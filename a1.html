@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>센터 서류도우미</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    color-scheme: light;
+    --ground:#F6F3EC;
+    --surface:#FFFFFF;
+    --surface-2:#EFEAE0;
+    --ink:#23282A;
+    --ink-dim:#63685F;
+    --ink-faint:#8B8F84;
+    --line:#DDD5C4;
+    --line-strong:#C7BCA4;
+    --teal:#2F6E6B;
+    --teal-strong:#1F4F4D;
+    --teal-tint:#DCEAE8;
+    --teal-tint-strong:#C6DEDB;
+    --amber:#B0691F;
+    --amber-strong:#8A5015;
+    --amber-tint:#F3E3CC;
+    --shadow: 0 1px 2px rgba(35,40,42,.06), 0 6px 18px -10px rgba(35,40,42,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      color-scheme: dark;
+      --ground:#181C1B; --surface:#212624; --surface-2:#262B28;
+      --ink:#EDEAE1; --ink-dim:#AAB0A7; --ink-faint:#767C74;
+      --line:#3A413E; --line-strong:#48524C;
+      --teal:#7BC4BE; --teal-strong:#9BD8D2; --teal-tint:#25302E; --teal-tint-strong:#2C3A38;
+      --amber:#E2A465; --amber-strong:#EFC08E; --amber-tint:#332715;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:'Noto Sans KR','Malgun Gothic',system-ui,sans-serif;line-height:1.6;font-size:15px;}
+  h1,h2,h3{font-family:'Noto Serif KR','Nanum Myeongjo',serif;font-weight:700;color:var(--ink);text-wrap:balance;margin:0;}
+  .mono{font-family:'IBM Plex Mono','D2Coding',monospace;font-variant-numeric:tabular-nums;}
+  button{font-family:inherit;cursor:pointer;}
+  :focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:4px;}
+
+  header.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb, var(--surface) 92%, transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+  .top-inner{max-width:1180px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;background:none;border:none;padding:0;}
+  .brand .mark{width:34px;height:34px;border-radius:9px;background:var(--teal);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Noto Serif KR',serif;font-weight:700;font-size:15px;flex:none;}
+  .brand .name{font-size:16px;font-weight:800;letter-spacing:-.01em;}
+  .brand .name b{color:var(--teal);}
+  .top-tag{font-size:12px;color:var(--ink-faint);}
+
+  main{max-width:1180px;margin:0 auto;padding:0 24px 80px;}
+
+  /* ---------- Home ---------- */
+  .hero{padding:44px 0 28px;}
+  .hero .eyebrow{font-size:12px;font-weight:700;letter-spacing:.09em;color:var(--teal-strong);text-transform:uppercase;}
+  .hero h1{font-size:30px;margin-top:8px;}
+  .hero p{color:var(--ink-dim);max-width:60ch;margin-top:10px;font-size:14.5px;}
+
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 20px;}
+  .filter-chip{border:1px solid var(--line);background:var(--surface);color:var(--ink-dim);font-size:13px;font-weight:600;padding:8px 14px;border-radius:20px;}
+  .filter-chip[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:#fff;}
+
+  .card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .doc-card{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow);transition:transform .12s ease,border-color .12s ease;}
+  .doc-card:hover{transform:translateY(-2px);border-color:var(--teal);}
+  .doc-card .top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .doc-card .icon{width:44px;height:44px;border-radius:12px;background:var(--teal-tint);display:flex;align-items:center;justify-content:center;font-family:'Noto Serif KR',serif;font-weight:700;font-size:17px;color:var(--teal-strong);flex:none;}
+  .doc-card .tag{font-size:10.5px;font-weight:700;background:var(--surface-2);color:var(--ink-dim);padding:3px 9px;border-radius:20px;white-space:nowrap;}
+  .doc-card h3{font-size:16.5px;}
+  .doc-card .desc{font-size:12.8px;color:var(--ink-dim);line-height:1.55;flex:1;}
+  .doc-card .meta{display:flex;gap:14px;font-size:11.5px;color:var(--ink-faint);border-top:1px solid var(--line);padding-top:10px;}
+  .doc-card .meta b{color:var(--ink-dim);font-weight:700;}
+
+  .drafts-box{margin-top:36px;background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:20px 22px;}
+  .drafts-box h2{font-size:15px;margin-bottom:12px;}
+  .draft-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line);}
+  .draft-row:first-of-type{border-top:none;}
+  .draft-row .t{font-size:13.5px;font-weight:600;}
+  .draft-row .d{font-size:11.5px;color:var(--ink-faint);}
+  .draft-row .actions{display:flex;gap:8px;}
+  .btn-mini{font-size:12px;font-weight:600;border-radius:7px;padding:6px 11px;border:1px solid var(--line);background:var(--surface);color:var(--ink-dim);}
+  .btn-mini.danger{color:#B4483D;}
+
+  /* ---------- Wizard ---------- */
+  .wiz-banner{border-bottom:1px solid var(--line);background:var(--surface);margin:0 -24px;padding:28px 24px;}
+  .wiz-inner{max-width:1180px;margin:0 auto;}
+  .back-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ink-dim);background:none;border:none;padding:0;}
+  .back-link:hover{color:var(--teal-strong);}
+  .wiz-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-top:16px;flex-wrap:wrap;}
+  .wiz-head .left{display:flex;gap:14px;}
+  .wiz-head .icon{width:52px;height:52px;border-radius:14px;background:var(--teal-tint);display:flex;align-items:center;justify-content:center;font-family:'Noto Serif KR',serif;font-weight:700;font-size:20px;color:var(--teal-strong);flex:none;}
+  .wiz-head h1{font-size:23px;}
+  .wiz-head .desc{font-size:13.5px;color:var(--ink-dim);margin-top:5px;max-width:56ch;}
+  .stat-tiles{display:flex;gap:8px;flex:none;}
+  .stat-tile{border:1px solid var(--line);background:var(--ground);border-radius:10px;padding:9px 13px;text-align:center;min-width:64px;}
+  .stat-tile .k{font-size:10.5px;color:var(--ink-faint);font-weight:600;}
+  .stat-tile .v{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;margin-top:2px;}
+
+  .usecases{margin-top:18px;background:var(--ground);border:1px solid var(--line);border-radius:12px;padding:14px 18px;}
+  .usecases .h{font-size:11.5px;font-weight:700;color:var(--ink-dim);margin-bottom:8px;}
+  .usecases ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 18px;}
+  .usecases li{font-size:12.5px;color:var(--ink-dim);display:flex;align-items:center;gap:6px;}
+  .usecases li::before{content:'✓';color:var(--teal);font-weight:700;}
+
+  .progress-wrap{margin-top:20px;}
+  .progress-labels{display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;color:var(--ink-faint);}
+  .progress-labels .active{color:var(--teal-strong);}
+  .progress-track{height:6px;border-radius:4px;background:var(--surface-2);overflow:hidden;margin-top:8px;}
+  .progress-fill{height:100%;background:var(--teal);transition:width .25s ease;}
+
+  .wiz-body{padding-top:26px;display:grid;grid-template-columns:0.85fr 1fr;gap:22px;align-items:start;}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;box-shadow:var(--shadow);}
+  .step-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-faint);font-weight:600;}
+  .step-title{font-size:18px;margin-top:4px;}
+  .step-sub{font-size:12.5px;color:var(--ink-dim);margin-top:3px;}
+
+  .field-grid{margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px 12px;}
+  .field.span2{grid-column:1 / -1;}
+  .field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;}
+  .field input, .field select, .field textarea{
+    width:100%;border:1px solid var(--line);border-radius:9px;background:var(--surface);
+    padding:9px 12px;font-family:inherit;font-size:13.5px;color:var(--ink);
+  }
+  .field textarea{min-height:88px;resize:vertical;line-height:1.5;}
+  .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--teal);}
+
+  .tool-row{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);margin-top:22px;padding-top:16px;}
+  .btn-soft{font-size:12px;font-weight:600;border:1px solid var(--line);background:var(--ground);color:var(--ink-dim);padding:8px 12px;border-radius:8px;}
+  .btn-text{font-size:12px;font-weight:600;border:none;background:none;color:var(--ink-faint);padding:8px 10px;}
+
+  .nav-row{display:flex;justify-content:space-between;margin-top:16px;}
+  .btn-nav{font-size:14px;font-weight:700;padding:10px 18px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink-dim);}
+  .btn-nav.primary{background:var(--teal);border-color:var(--teal);color:#fff;}
+  .btn-nav:disabled{opacity:.35;cursor:not-allowed;}
+
+  .preview-col{position:sticky;top:82px;}
+  .preview-toolbar{background:var(--surface);border:1px solid var(--line);border-bottom:none;border-radius:14px 14px 0 0;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;}
+  .preview-toolbar .l{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;}
+  .live-chip{font-size:10.5px;font-weight:700;background:var(--teal-tint);color:var(--teal-strong);padding:3px 8px;border-radius:20px;}
+  .preview-toolbar .r{display:flex;gap:6px;}
+  .preview-card{background:var(--surface-2);border:1px solid var(--line);border-radius:0 0 14px 14px;padding:22px;}
+
+  .doc-page{background:#fff;color:#111;max-width:480px;margin:0 auto;padding:40px 34px;border-radius:2px;box-shadow:0 1px 3px rgba(0,0,0,.12), 0 8px 20px -10px rgba(0,0,0,.25);font-family:'Noto Serif KR',serif;font-size:13px;}
+  .doc-title{text-align:center;font-size:19px;font-weight:700;letter-spacing:.5em;padding-left:.5em;margin-bottom:26px;}
+  .doc-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:18px;}
+  .doc-table th, .doc-table td{border:1px solid #999;padding:7px 10px;text-align:left;font-weight:400;}
+  .doc-table th{background:#f4f4f2;font-weight:700;width:92px;white-space:nowrap;}
+  .doc-fill{color:#111;}
+  .doc-ph{color:#B3AFA6;}
+  .doc-article{font-weight:700;font-size:13px;margin:16px 0 6px;}
+  .doc-body{line-height:2;text-indent:1em;white-space:pre-wrap;font-size:12.8px;}
+  .doc-sign{text-align:center;margin-top:34px;font-size:13px;}
+  .doc-sign .line{margin-top:6px;}
+  .doc-official{font-family:'Noto Sans KR',sans-serif;font-size:12.5px;}
+  .doc-official .row{display:flex;justify-content:space-between;color:#555;font-size:11.5px;margin-bottom:14px;}
+  .doc-official .fieldline{margin:10px 0;}
+  .doc-official .fieldline b{display:inline-block;width:58px;color:#333;}
+  .doc-official .para{line-height:1.9;margin:14px 0;text-indent:1em;white-space:pre-wrap;}
+  .doc-official .signoff{text-align:right;margin-top:30px;font-weight:700;font-size:13.5px;}
+
+  .preview-note{text-align:center;font-size:11px;color:var(--ink-faint);margin-top:10px;}
+  .disclaimer{display:flex;gap:10px;background:var(--surface-2);border-radius:12px;padding:14px 16px;margin-top:30px;font-size:12px;color:var(--ink-faint);line-height:1.55;}
+  .disclaimer b{color:var(--ink-dim);}
+
+  .mobile-tabs{display:none;}
+
+  @media print{
+    header.top, .wiz-banner, .panel, .preview-toolbar, .disclaimer, .mobile-tabs{display:none !important;}
+    body{background:#fff;}
+    main{padding:0;max-width:none;}
+    .wiz-body{display:block;padding:0;}
+    .preview-col{position:static;}
+    .preview-card{border:none;border-radius:0;padding:0;background:#fff;}
+    .doc-page{box-shadow:none;max-width:100%;}
+  }
+
+  @media (max-width:960px){
+    .card-grid{grid-template-columns:1fr 1fr;}
+    .wiz-body{grid-template-columns:1fr;}
+    .field-grid{grid-template-columns:1fr;}
+    .field.span2{grid-column:auto;}
+    .mobile-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:16px;}
+    .mobile-tabs button{padding:8px;border-radius:7px;border:none;background:none;font-size:13px;font-weight:600;color:var(--ink-dim);}
+    .mobile-tabs button[aria-pressed="true"]{background:var(--teal);color:#fff;}
+    .step-panel.hide-mobile, .preview-col.hide-mobile{display:none;}
+    .preview-col{position:static;}
+    .stat-tiles{display:none;}
+  }
+  @media (max-width:640px){
+    .card-grid{grid-template-columns:1fr;}
+    .top-inner{padding:0 16px;}
+    main{padding:0 16px 60px;}
+    .wiz-banner{margin:0 -16px;padding:20px 16px;}
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <button class="brand" id="homeBtn">
+      <span class="mark">서</span>
+      <span class="name">센터 <b>서류도우미</b></span>
+    </button>
+    <span class="top-tag">원주시정신건강복지센터 · 직원 전용 내부 도구</span>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<script>
+(function(){
+
+// ============ Document schemas ============
+const DOCS = [
+  {
+    id:"counsel-apply", cat:"상담·사례관리", tagLabel:"상담", icon:"상",
+    title:"상담 신청서",
+    desc:"센터 상담을 새로 신청할 때 작성하는 기본 서류입니다. 상담 분야와 신청 동기를 정리해 접수창구에 전달합니다.",
+    timeMin:3,
+    useCases:["개인·가족 상담을 새로 신청할 때","방문 전 상담 동기를 미리 정리해둘 때","의뢰기관 연계로 상담을 시작할 때"],
+    steps:[
+      { title:"신청인 정보", sub:"상담을 신청하는 본인 정보입니다.", fields:[
+        {key:"name", label:"성명", type:"text", placeholder:"홍길동"},
+        {key:"birth", label:"생년월일", type:"text", placeholder:"1990-01-01"},
+        {key:"phone", label:"연락처", type:"text", placeholder:"010-0000-0000"},
+        {key:"address", label:"주소", type:"text", placeholder:"신청인 주소", span:2},
+      ]},
+      { title:"상담 정보", sub:"희망하는 상담 분야와 방식을 선택해주세요.", fields:[
+        {key:"field", label:"상담 희망 분야", type:"select", options:["개인상담","가족상담","위기상담","정신건강 스크리닝","기타"]},
+        {key:"method", label:"상담 방식", type:"select", options:["내소 상담","방문 상담","전화 상담"]},
+        {key:"reason", label:"신청 동기 · 상담받고 싶은 내용", type:"textarea", placeholder:"요즘 겪고 있는 어려움이나 상담을 통해 얻고 싶은 도움을 적어주세요.", span:2},
+      ]},
+      { title:"의뢰 정보", sub:"타 기관 연계 등 참고할 내용이 있다면 적어주세요. (선택)", fields:[
+        {key:"referrer", label:"의뢰기관 / 추천인", type:"text", placeholder:"예: 원주시청 복지정책과"},
+        {key:"note", label:"전달할 추가 사항", type:"textarea", placeholder:"담당자가 미리 알아두면 좋을 내용", span:2},
+      ]},
+    ],
+    sample:{name:"홍길동", birth:"1990-03-12", phone:"010-1234-5678", address:"강원특별자치도 원주시 시청로 1",
+      field:"개인상담", method:"내소 상담", reason:"최근 불면과 불안감이 심해져 전문 상담을 받고 싶습니다.",
+      referrer:"", note:""},
+    preview(d){
+      return docTable([
+        ["성명", val(d.name)], ["생년월일", val(d.birth)], ["연락처", val(d.phone)], ["주소", val(d.address), 3],
+        ["상담분야", val(d.field)], ["상담방식", val(d.method)],
+      ]) + docArticle("신청 동기") + docBody(d.reason)
+        + (d.referrer ? docArticle("의뢰기관 / 추천인") + docBody(d.referrer) : "")
+        + (d.note ? docArticle("전달 사항") + docBody(d.note) : "")
+        + docSign(d.name, "원주시정신건강복지센터");
+    }
+  },
+  {
+    id:"case-consent", cat:"상담·사례관리", tagLabel:"사례관리", icon:"사",
+    title:"사례관리 서비스 이용 동의서",
+    desc:"사례관리를 시작하기 전 개인정보 수집·이용에 대한 안내와 동의를 받는 서류입니다.",
+    timeMin:4,
+    useCases:["신규 사례관리 대상자를 등록할 때","서비스 정보 공유 범위를 안내하고 동의받을 때","보호자 동의가 함께 필요한 경우"],
+    steps:[
+      { title:"대상자 정보", sub:"사례관리를 받는 당사자 정보입니다.", fields:[
+        {key:"name", label:"성명", type:"text", placeholder:"홍길동"},
+        {key:"birth", label:"생년월일", type:"text", placeholder:"1990-01-01"},
+        {key:"phone", label:"연락처", type:"text", placeholder:"010-0000-0000"},
+        {key:"address", label:"주소", type:"text", placeholder:"대상자 주소", span:2},
+      ]},
+      { title:"보호자 정보", sub:"보호자가 있는 경우에만 입력해주세요. (선택)", fields:[
+        {key:"guardianName", label:"보호자 성명", type:"text", placeholder:"보호자 이름"},
+        {key:"guardianPhone", label:"보호자 연락처", type:"text", placeholder:"010-0000-0000"},
+        {key:"relation", label:"대상자와의 관계", type:"text", placeholder:"예: 배우자, 자녀"},
+      ]},
+      { title:"동의 사항", sub:"안내 내용을 확인한 뒤 동의 여부를 선택해주세요.", fields:[
+        {key:"consentYN", label:"동의 여부", type:"select", options:["동의함","동의하지 않음"]},
+        {key:"consentDate", label:"동의 일자", type:"text", placeholder:"2026-01-01"},
+      ]},
+    ],
+    sample:{name:"김민수", birth:"1965-05-20", phone:"010-2222-3333", address:"강원특별자치도 원주시 단계동 12",
+      guardianName:"김영희", guardianPhone:"010-4444-5555", relation:"배우자",
+      consentYN:"동의함", consentDate:"2026-01-15"},
+    preview(d){
+      return `<p class="doc-body" style="text-indent:0;margin-bottom:16px">원주시정신건강복지센터는 사례관리 서비스 제공을 위해 아래와 같이 개인정보를 수집·이용합니다.</p>`
+        + docTable([
+            ["수집목적", "사례관리 서비스 제공 및 상담 기록 관리", 3],
+            ["수집항목", "성명, 생년월일, 연락처, 주소, 상담·서비스 이력", 3],
+            ["보유기간", "서비스 종료 후 5년", 3],
+          ])
+        + docArticle("대상자 정보")
+        + docTable([["성명", val(d.name)], ["생년월일", val(d.birth)], ["연락처", val(d.phone)], ["주소", val(d.address), 3]])
+        + (d.guardianName ? docArticle("보호자 정보") + docTable([["성명", val(d.guardianName)], ["연락처", val(d.guardianPhone)], ["관계", val(d.relation)]]) : "")
+        + `<p class="doc-body" style="margin-top:18px">위와 같이 개인정보 수집·이용에 대한 안내를 받았으며, 이에 <b class="doc-fill">${d.consentYN||'<span class="doc-ph">동의 여부</span>'}</b>합니다.</p>`
+        + docSign(d.name, "원주시정신건강복지센터", d.consentDate);
+    }
+  },
+  {
+    id:"leave-request", cat:"행정·인사", tagLabel:"인사", icon:"휴",
+    title:"휴가 신청서",
+    desc:"연차·경조사 등 휴가를 신청할 때 작성하는 서류입니다. 결재 순서에 따라 제출합니다.",
+    timeMin:2,
+    useCases:["연차·반차를 신청할 때","경조사·병가 등 휴가를 신청할 때","휴가 사유를 공식적으로 남겨둘 때"],
+    steps:[
+      { title:"신청인 정보", sub:"소속과 직급을 입력해주세요.", fields:[
+        {key:"dept", label:"소속(부서)", type:"text", placeholder:"예: 상담운영팀"},
+        {key:"name", label:"성명", type:"text", placeholder:"홍길동"},
+        {key:"position", label:"직급", type:"text", placeholder:"예: 팀원"},
+      ]},
+      { title:"휴가 정보", sub:"휴가 종류와 기간, 사유를 입력해주세요.", fields:[
+        {key:"type", label:"휴가 종류", type:"select", options:["연차","반차","병가","경조사","기타"]},
+        {key:"days", label:"신청 일수", type:"text", placeholder:"예: 1일"},
+        {key:"startDate", label:"시작일", type:"text", placeholder:"2026-01-01"},
+        {key:"endDate", label:"종료일", type:"text", placeholder:"2026-01-01"},
+        {key:"reason", label:"사유", type:"textarea", placeholder:"휴가 사유를 간단히 적어주세요.", span:2},
+      ]},
+    ],
+    sample:{dept:"상담운영팀", name:"이수진", position:"팀원", type:"연차", days:"1일", startDate:"2026-03-10", endDate:"2026-03-10", reason:"개인 사정으로 연차를 사용합니다."},
+    preview(d){
+      return docTable([
+        ["소속", val(d.dept)], ["성명", val(d.name)], ["직급", val(d.position)],
+        ["휴가종류", val(d.type)], ["신청일수", val(d.days)],
+        ["기간", (d.startDate||d.endDate) ? `${val(d.startDate)} ~ ${val(d.endDate)}` : docPh("휴가 기간"), 3],
+      ]) + docArticle("사유") + docBody(d.reason) + approvalBox() + docSign(d.name, "원주시정신건강복지센터장");
+    }
+  },
+  {
+    id:"trip-request", cat:"행정·인사", tagLabel:"인사", icon:"출",
+    title:"출장 신청서",
+    desc:"외부 출장·교육 참석 전에 작성해 결재를 받는 서류입니다.",
+    timeMin:3,
+    useCases:["교육·회의 참석을 위해 출장을 신청할 때","가정방문 등 외부 업무 일정을 등록할 때","출장 경비를 사전에 정리해둘 때"],
+    steps:[
+      { title:"신청인 정보", sub:"소속과 직급을 입력해주세요.", fields:[
+        {key:"dept", label:"소속(부서)", type:"text", placeholder:"예: 정신건강증진팀"},
+        {key:"name", label:"성명", type:"text", placeholder:"홍길동"},
+        {key:"position", label:"직급", type:"text", placeholder:"예: 팀원"},
+      ]},
+      { title:"출장 정보", sub:"출장 목적과 기간을 입력해주세요.", fields:[
+        {key:"purpose", label:"출장 목적", type:"text", placeholder:"예: 실무자 교육 참석", span:2},
+        {key:"place", label:"출장지", type:"text", placeholder:"예: 강원특별자치도청"},
+        {key:"transport", label:"교통수단", type:"select", options:["관용차","대중교통","자가용","기타"]},
+        {key:"startDate", label:"시작일", type:"text", placeholder:"2026-01-01"},
+        {key:"endDate", label:"종료일", type:"text", placeholder:"2026-01-01"},
+      ]},
+      { title:"경비 정보", sub:"예상 경비가 있다면 입력해주세요. (선택)", fields:[
+        {key:"cost", label:"예상 경비", type:"text", placeholder:"예: 50,000원"},
+        {key:"note", label:"비고", type:"textarea", placeholder:"기타 전달 사항", span:2},
+      ]},
+    ],
+    sample:{dept:"정신건강증진팀", name:"박지훈", position:"팀장", purpose:"2026년 정신건강 실무자 역량강화 교육 참석",
+      place:"강원특별자치도청 대강당", transport:"관용차", startDate:"2026-04-05", endDate:"2026-04-05",
+      cost:"30,000원", note:"당일 출장"},
+    preview(d){
+      return docTable([
+        ["소속", val(d.dept)], ["성명", val(d.name)], ["직급", val(d.position)],
+        ["출장목적", val(d.purpose), 3],
+        ["출장지", val(d.place)], ["교통수단", val(d.transport)],
+        ["기간", (d.startDate||d.endDate) ? `${val(d.startDate)} ~ ${val(d.endDate)}` : docPh("출장 기간"), 3],
+      ]) + (d.cost ? docTable([["예상경비", val(d.cost), 3]]) : "")
+        + (d.note ? docArticle("비고") + docBody(d.note) : "")
+        + approvalBox() + docSign(d.name, "원주시정신건강복지센터장");
+    }
+  },
+  {
+    id:"complaint", cat:"민원·공문", tagLabel:"민원", icon:"민",
+    title:"민원 신청서(진정서)",
+    desc:"센터 이용이나 지역사회 정신건강 사업과 관련한 요청·건의를 정식 문서로 접수할 때 씁니다.",
+    timeMin:4,
+    useCases:["시설·서비스 이용 관련 불편을 제기할 때","처리 결과를 공식적으로 요청할 때","건의사항을 근거와 함께 정리해 전달할 때"],
+    steps:[
+      { title:"신청인(민원인)", sub:"민원을 제기하는 본인 정보입니다.", fields:[
+        {key:"name", label:"성명", type:"text", placeholder:"홍길동"},
+        {key:"phone", label:"연락처", type:"text", placeholder:"010-0000-0000"},
+        {key:"address", label:"주소", type:"text", placeholder:"신청인 주소", span:2},
+      ]},
+      { title:"접수 기관", sub:"민원을 접수할 기관명입니다.", fields:[
+        {key:"org", label:"접수 기관", type:"text", placeholder:"원주시정신건강복지센터"},
+      ]},
+      { title:"민원 내용", sub:"요청 사항과 근거를 정리해주세요.", fields:[
+        {key:"title", label:"민원 제목", type:"text", placeholder:"예: 프로그램 운영시간 관련 건의", span:2},
+        {key:"content", label:"민원 내용", type:"textarea", placeholder:"불편사항 또는 요청사항과 그 근거를 적어주세요.", span:2},
+      ]},
+    ],
+    sample:{name:"정하늘", phone:"010-7777-8888", address:"강원특별자치도 원주시 무실동 45",
+      org:"원주시정신건강복지센터", title:"평일 야간 상담 프로그램 운영 건의",
+      content:"직장인 참여자를 위해 평일 야간 시간대 상담 프로그램을 추가로 운영해주시기를 요청드립니다."},
+    preview(d){
+      return docTable([
+        ["접수기관", val(d.org), 3],
+        ["신청인", val(d.name)], ["연락처", val(d.phone)],
+        ["주소", val(d.address), 3],
+        ["제목", val(d.title), 3],
+      ]) + docArticle("민원 내용") + docBody(d.content)
+        + `<p class="doc-body" style="margin-top:14px">위와 같이 민원을 신청하오니 검토 후 조치하여 주시기 바랍니다.</p>`
+        + docSign(d.name, d.org || "원주시정신건강복지센터");
+    }
+  },
+  {
+    id:"coop-memo", cat:"민원·공문", tagLabel:"공문", icon:"공",
+    title:"협조 공문",
+    desc:"유관 기관·부서에 자료나 협조를 요청하는 간단한 공문 형식 서류입니다.",
+    timeMin:3,
+    useCases:["유관기관에 자료·인력 협조를 요청할 때","행사·사업 협조 공문을 보낼 때","간단한 안내·통지 문서를 만들 때"],
+    steps:[
+      { title:"수신 · 발신", sub:"문서를 보내고 받을 기관을 입력해주세요.", fields:[
+        {key:"to", label:"수신", type:"text", placeholder:"예: 원주시청 복지정책과장"},
+        {key:"from", label:"발신", type:"text", placeholder:"원주시정신건강복지센터"},
+      ]},
+      { title:"문서 내용", sub:"제목과 본문을 작성해주세요.", fields:[
+        {key:"title", label:"제목", type:"text", placeholder:"예: 정신건강 인식개선 캠페인 협조 요청", span:2},
+        {key:"content", label:"본문", type:"textarea", placeholder:"협조를 요청하는 배경과 구체적인 요청 사항을 적어주세요.", span:2},
+        {key:"attach", label:"붙임 (선택)", type:"text", placeholder:"예: 사업계획서 1부", span:2},
+      ]},
+      { title:"시행 정보", sub:"문서번호와 시행일자입니다.", fields:[
+        {key:"docNo", label:"문서번호", type:"text", placeholder:"예: 원주정신건강-123"},
+        {key:"date", label:"시행일자", type:"text", placeholder:"2026-01-01"},
+      ]},
+    ],
+    sample:{to:"원주시청 복지정책과장", from:"원주시정신건강복지센터장", title:"정신건강 인식개선 캠페인 협조 요청",
+      content:"우리 센터에서 진행하는 정신건강 인식개선 캠페인과 관련하여 아래와 같이 협조를 요청하오니 적극 협조하여 주시기 바랍니다.",
+      attach:"캠페인 운영계획서 1부", docNo:"원주정신건강-2026-045", date:"2026-03-01"},
+    preview(d){
+      return `<div class="doc-official">`
+        + `<div class="row"><span>${val(d.docNo)}</span><span>${val(d.date)}</span></div>`
+        + `<div class="fieldline"><b>수신</b>${val(d.to)}</div>`
+        + `<div class="fieldline"><b>제목</b>${val(d.title)}</div>`
+        + `<p class="para">${d.content ? escapeHtml(d.content) : '<span class="doc-ph">본문 내용이 여기에 표시됩니다.</span>'}</p>`
+        + (d.attach ? `<div class="fieldline"><b>붙임</b>${val(d.attach)}</div>` : "")
+        + `<div class="signoff">${val(d.from, "발신 기관")}</div>`
+        + `</div>`;
+    }
+  },
+];
+
+// ============ preview helpers ============
+function escapeHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function val(v, ph){ return v ? `<span class="doc-fill">${escapeHtml(v)}</span>` : docPh(ph); }
+function docPh(label){ return `<span class="doc-ph">${label||'입력 전'}</span>`; }
+function docTable(rows){
+  const trs = rows.map(r=>{
+    const [label, content, span] = r;
+    return `<tr><th>${label}</th><td colspan="${span?span:1}">${content}</td></tr>`;
+  }).join("");
+  return `<table class="doc-table"><tbody>${trs}</tbody></table>`;
+}
+function docArticle(t){ return `<p class="doc-article">${t}</p>`; }
+function docBody(text){ return `<p class="doc-body">${text ? escapeHtml(text) : '<span class="doc-ph">(내용이 여기에 표시됩니다.)</span>'}</p>`; }
+function docSign(name, org, date){
+  const today = date || new Date().toISOString().slice(0,10);
+  return `<div class="doc-sign"><p>${today}</p><p class="line">신청인 ${val(name,'성명')} <span class="doc-ph" style="margin-left:6px">(인)</span></p><p class="line" style="font-weight:700;margin-top:10px">${val(org,'접수 기관')} 귀중</p></div>`;
+}
+function approvalBox(){
+  return `<table class="doc-table" style="margin-top:4px"><tbody><tr>
+    <th style="text-align:center;width:auto">담당</th><th style="text-align:center;width:auto">팀장</th><th style="text-align:center;width:auto">센터장</th>
+  </tr><tr>
+    <td style="height:46px"></td><td style="height:46px"></td><td style="height:46px"></td>
+  </tr></tbody></table>`;
+}
+
+// ============ app state ============
+let state = { view:"home", filter:"전체", docId:null, step:0, mobileTab:"input" };
+const DATA_KEY = "center-docs-formdata";
+const DRAFT_KEY = "center-docs-drafts";
+
+function loadAll(){ try{ return JSON.parse(localStorage.getItem(DATA_KEY)||"{}"); }catch(e){ return {}; } }
+function saveAll(all){ try{ localStorage.setItem(DATA_KEY, JSON.stringify(all)); }catch(e){} }
+function getFormData(id){ const all = loadAll(); return all[id] || {}; }
+function setFormData(id, data){ const all = loadAll(); all[id] = data; saveAll(all); }
+
+function loadDrafts(){ try{ return JSON.parse(localStorage.getItem(DRAFT_KEY)||"{}"); }catch(e){ return {}; } }
+function saveDraft(id){
+  const drafts = loadDrafts();
+  drafts[id] = { savedAt: new Date().toISOString() };
+  try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts)); }catch(e){}
+}
+function removeDraft(id){
+  const drafts = loadDrafts();
+  delete drafts[id];
+  try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts)); }catch(e){}
+  const all = loadAll(); delete all[id]; saveAll(all);
+}
+
+const app = document.getElementById("app");
+document.getElementById("homeBtn").addEventListener("click", ()=>{ state.view="home"; render(); });
+
+function fmtDate(iso){
+  const d = new Date(iso);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+}
+
+// ============ render: home ============
+function renderHome(){
+  const cats = ["전체","상담·사례관리","행정·인사","민원·공문"];
+  const filtered = state.filter==="전체" ? DOCS : DOCS.filter(d=>d.cat===state.filter);
+  const drafts = loadDrafts();
+  const draftIds = Object.keys(drafts);
+
+  app.innerHTML = `
+    <section class="hero">
+      <span class="eyebrow">Internal Tool</span>
+      <h1>센터 서류도우미</h1>
+      <p>상담·행정·민원까지, 자주 쓰는 서류를 질문에 답하듯 채우면 완성된 양식으로 바로 만들어 드립니다. 작성 중인 내용은 이 브라우저에 자동 저장됩니다.</p>
+    </section>
+    <div class="filters" id="filters">
+      ${cats.map(c=>`<button class="filter-chip" data-cat="${c}" aria-pressed="${c===state.filter}">${c}</button>`).join("")}
+    </div>
+    <div class="card-grid" id="cardGrid">
+      ${filtered.map(d=>`
+        <button class="doc-card" data-id="${d.id}">
+          <div class="top-row">
+            <span class="icon">${d.icon}</span>
+            <span class="tag">${d.tagLabel}</span>
+          </div>
+          <h3>${d.title}</h3>
+          <p class="desc">${d.desc}</p>
+          <div class="meta"><span>예상 <b>${d.timeMin}분</b></span><span>항목 <b>${d.steps.reduce((a,s)=>a+s.fields.length,0)}개</b></span></div>
+        </button>
+      `).join("")}
+    </div>
+    ${draftIds.length ? `
+      <div class="drafts-box">
+        <h2>저장된 초안 (${draftIds.length})</h2>
+        ${draftIds.map(id=>{
+          const doc = DOCS.find(d=>d.id===id);
+          if(!doc) return "";
+          return `<div class="draft-row">
+            <div><div class="t">${doc.title}</div><div class="d">${fmtDate(drafts[id].savedAt)} 저장됨</div></div>
+            <div class="actions">
+              <button class="btn-mini" data-resume="${id}">이어 작성</button>
+              <button class="btn-mini danger" data-remove="${id}">삭제</button>
+            </div>
+          </div>`;
+        }).join("")}
+      </div>
+    ` : ""}
+  `;
+
+  app.querySelectorAll("#filters .filter-chip").forEach(b=>b.addEventListener("click", ()=>{ state.filter=b.dataset.cat; renderHome(); }));
+  app.querySelectorAll("#cardGrid .doc-card").forEach(b=>b.addEventListener("click", ()=>openDoc(b.dataset.id)));
+  app.querySelectorAll("[data-resume]").forEach(b=>b.addEventListener("click", ()=>openDoc(b.dataset.resume)));
+  app.querySelectorAll("[data-remove]").forEach(b=>b.addEventListener("click", (e)=>{ e.stopPropagation(); removeDraft(b.dataset.remove); renderHome(); }));
+}
+
+function openDoc(id){
+  state.view="wizard"; state.docId=id; state.step=0; state.mobileTab="input";
+  render();
+}
+
+// ============ render: wizard ============
+function renderWizard(){
+  const doc = DOCS.find(d=>d.id===state.docId);
+  const data = getFormData(doc.id);
+  const totalSteps = doc.steps.length;
+  const step = doc.steps[state.step];
+  const totalFields = doc.steps.reduce((a,s)=>a+s.fields.length,0);
+  const filledFields = doc.steps.reduce((a,s)=>a + s.fields.filter(f=>data[f.key]).length, 0);
+  const pct = Math.round((filledFields/totalFields)*100);
+
+  app.innerHTML = `
+    <div class="wiz-banner"><div class="wiz-inner">
+      <button class="back-link" id="backBtn">&larr; 서류 목록</button>
+      <div class="wiz-head">
+        <div class="left">
+          <span class="icon">${doc.icon}</span>
+          <div>
+            <h1>${doc.title}</h1>
+            <p class="desc">${doc.desc}</p>
+          </div>
+        </div>
+        <div class="stat-tiles">
+          <div class="stat-tile"><div class="k">예상</div><div class="v">${doc.timeMin}분</div></div>
+          <div class="stat-tile"><div class="k">항목</div><div class="v">${totalFields}개</div></div>
+        </div>
+      </div>
+      <div class="usecases">
+        <div class="h">이럴 때 씁니다</div>
+        <ul>${doc.useCases.map(u=>`<li>${u}</li>`).join("")}</ul>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-labels">
+          ${doc.steps.map((s,i)=>`<span class="${i===state.step?'active':''}">${s.title}</span>`).join("")}
+          <span class="mono">입력 ${pct}%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      </div>
+    </div></div>
+
+    <div class="mobile-tabs">
+      <button id="tabInput" aria-pressed="${state.mobileTab==='input'}">입력</button>
+      <button id="tabPreview" aria-pressed="${state.mobileTab==='preview'}">미리보기</button>
+    </div>
+
+    <div class="wiz-body">
+      <div class="step-panel ${state.mobileTab!=='input' ? 'hide-mobile':''}">
+        <div class="panel">
+          <p class="step-eyebrow">STEP ${state.step+1} / ${totalSteps}</p>
+          <h2 class="step-title">${step.title}</h2>
+          <p class="step-sub">${step.sub}</p>
+          <div class="field-grid" id="fieldGrid">
+            ${step.fields.map(f=>renderField(f, data[f.key]||"")).join("")}
+          </div>
+          <div class="tool-row">
+            <button class="btn-soft" id="sampleBtn">예시로 채워보기</button>
+            <button class="btn-text" id="clearBtn">전체 비우기</button>
+          </div>
+        </div>
+        <div class="nav-row">
+          <button class="btn-nav" id="prevBtn" ${state.step===0?"disabled":""}>&larr; 이전</button>
+          <button class="btn-nav primary" id="nextBtn">${state.step===totalSteps-1 ? "완료" : "다음 →"}</button>
+        </div>
+      </div>
+
+      <div class="preview-col ${state.mobileTab!=='preview' ? 'hide-mobile':''}">
+        <div class="preview-toolbar">
+          <div class="l">완성 서류 미리보기 <span class="live-chip">실시간 반영</span></div>
+          <div class="r">
+            <button class="btn-soft" id="saveBtn">저장</button>
+            <button class="btn-soft" id="printBtn">인쇄</button>
+          </div>
+        </div>
+        <div class="preview-card">
+          <div class="doc-page" id="docPage">${doc.preview(data)}</div>
+          <p class="preview-note">A4 · 입력한 내용이 실시간으로 양식에 반영됩니다</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="disclaimer"><b>안내</b> · 이 도구는 센터 내부 업무용 서식 작성을 돕는 참고용 도구입니다. 작성한 내용은 이 브라우저에만 저장되며 외부로 전송되지 않습니다. 최종 제출 전 담당자 확인을 받으세요.</div>
+  `;
+
+  document.getElementById("backBtn").addEventListener("click", ()=>{ state.view="home"; render(); });
+  document.getElementById("prevBtn").addEventListener("click", ()=>{ if(state.step>0){ state.step--; render(); } });
+  document.getElementById("nextBtn").addEventListener("click", ()=>{
+    if(state.step<totalSteps-1){ state.step++; render(); }
+    else { saveDraft(doc.id); render(); }
+  });
+  document.getElementById("sampleBtn").addEventListener("click", ()=>{
+    setFormData(doc.id, Object.assign({}, data, doc.sample));
+    render();
+  });
+  document.getElementById("clearBtn").addEventListener("click", ()=>{
+    setFormData(doc.id, {});
+    render();
+  });
+  document.getElementById("saveBtn").addEventListener("click", ()=>{
+    saveDraft(doc.id);
+    const b = document.getElementById("saveBtn");
+    const old = b.textContent; b.textContent = "저장됨 ✓";
+    setTimeout(()=>{ b.textContent = old; }, 1400);
+  });
+  document.getElementById("printBtn").addEventListener("click", ()=> window.print());
+
+  const tabInput = document.getElementById("tabInput"), tabPreview = document.getElementById("tabPreview");
+  if(tabInput) tabInput.addEventListener("click", ()=>{ state.mobileTab="input"; render(); });
+  if(tabPreview) tabPreview.addEventListener("click", ()=>{ state.mobileTab="preview"; render(); });
+
+  step.fields.forEach(f=>{
+    const el = document.getElementById("f_"+f.key);
+    if(!el) return;
+    el.addEventListener("input", ()=>{
+      const cur = getFormData(doc.id);
+      cur[f.key] = el.value;
+      setFormData(doc.id, cur);
+      const dp = document.getElementById("docPage");
+      if(dp) dp.innerHTML = doc.preview(cur);
+      const pctNow = Math.round((doc.steps.reduce((a,s)=>a + s.fields.filter(ff=>cur[ff.key]).length,0)/totalFields)*100);
+      const fill = document.querySelector(".progress-fill");
+      const label = document.querySelector(".progress-labels .mono");
+      if(fill) fill.style.width = pctNow+"%";
+      if(label) label.textContent = "입력 "+pctNow+"%";
+    });
+  });
+}
+
+function renderField(f, value){
+  const cls = "field" + (f.span===2 ? " span2" : "");
+  if(f.type==="textarea"){
+    return `<div class="${cls}"><label for="f_${f.key}">${f.label}</label><textarea id="f_${f.key}" placeholder="${f.placeholder||''}">${escapeHtml(value)}</textarea></div>`;
+  }
+  if(f.type==="select"){
+    return `<div class="${cls}"><label for="f_${f.key}">${f.label}</label><select id="f_${f.key}">
+      <option value="" ${!value?"selected":""}>선택해주세요</option>
+      ${f.options.map(o=>`<option value="${o}" ${value===o?"selected":""}>${o}</option>`).join("")}
+    </select></div>`;
+  }
+  return `<div class="${cls}"><label for="f_${f.key}">${f.label}</label><input id="f_${f.key}" type="text" placeholder="${f.placeholder||''}" value="${escapeHtml(value)}"></div>`;
+}
+
+function render(){
+  if(state.view==="home") renderHome();
+  else renderWizard();
+  window.scrollTo(0,0);
+}
+
+render();
+})();
+</script>
+</body>
+</html>
