@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>원주센터 휴무관리 대시보드</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    color-scheme: light;
+    --ground:#F6F3EC;
+    --surface:#FFFFFF;
+    --surface-2:#EFEAE0;
+    --ink:#23282A;
+    --ink-dim:#63685F;
+    --ink-faint:#8B8F84;
+    --line:#DDD5C4;
+    --line-strong:#C7BCA4;
+    --teal:#2F6E6B;
+    --teal-strong:#1F4F4D;
+    --teal-tint:#DCEAE8;
+    --teal-tint-strong:#C6DEDB;
+    --amber:#B0691F;
+    --amber-strong:#8A5015;
+    --amber-tint:#F3E3CC;
+    --shadow: 0 1px 2px rgba(35,40,42,.06), 0 6px 18px -10px rgba(35,40,42,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      color-scheme: dark;
+      --ground:#181C1B;
+      --surface:#202523;
+      --surface-2:#262B28;
+      --ink:#EDEAE1;
+      --ink-dim:#AAB0A7;
+      --ink-faint:#767C74;
+      --line:#38403C;
+      --line-strong:#48524C;
+      --teal:#7BC4BE;
+      --teal-strong:#9BD8D2;
+      --teal-tint:#25302E;
+      --teal-tint-strong:#2C3A38;
+      --amber:#E2A465;
+      --amber-strong:#EFC08E;
+      --amber-tint:#332715;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--ground);
+    color:var(--ink);
+    font-family:'Noto Sans KR','Malgun Gothic',system-ui,sans-serif;
+    line-height:1.6;
+    font-size:15px;
+  }
+  ::selection{ background:var(--teal-tint-strong); }
+  h1,h2,h3{
+    font-family:'Noto Serif KR','Nanum Myeongjo',serif;
+    font-weight:700;
+    color:var(--ink);
+    text-wrap:balance;
+    margin:0;
+  }
+  .mono{ font-family:'IBM Plex Mono','D2Coding',monospace; font-variant-numeric:tabular-nums; }
+  a{ color:var(--teal-strong); }
+  :focus-visible{ outline:2px solid var(--teal); outline-offset:2px; border-radius:4px; }
+
+  .app{
+    max-width:1240px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns:222px 1fr;
+    align-items:start;
+  }
+
+  /* ---------- Sidebar ---------- */
+  nav.side{
+    position:sticky;
+    top:0;
+    height:100vh;
+    padding:28px 18px 28px 24px;
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+    border-right:1px solid var(--line);
+    overflow-y:auto;
+  }
+  .brand{
+    display:flex; flex-direction:column; gap:2px;
+  }
+  .brand .eyebrow{
+    font-size:11px; letter-spacing:.09em; color:var(--ink-faint); font-weight:600;
+  }
+  .brand .name{ font-family:'Noto Serif KR',serif; font-weight:700; font-size:18px; }
+  .side-links{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; }
+  .side-links a{
+    display:flex; align-items:baseline; gap:8px;
+    text-decoration:none; color:var(--ink-dim);
+    font-size:13.5px; font-weight:500;
+    padding:7px 8px; border-radius:6px;
+    border-left:2px solid transparent;
+  }
+  .side-links a:hover{ background:var(--surface-2); color:var(--ink); }
+  .side-links .num{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-faint); }
+  .side-refs{ margin-top:auto; padding-top:16px; border-top:1px solid var(--line); }
+  .side-refs .h{ font-size:11px; letter-spacing:.08em; color:var(--ink-faint); font-weight:600; margin-bottom:8px; }
+  .side-refs ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+  .side-refs li{ font-size:12.5px; color:var(--ink-dim); }
+  .side-refs .path{ display:block; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-faint); }
+
+  main{ padding:28px 32px 60px; min-width:0; }
+
+  /* ---------- Hero ---------- */
+  .hero{ padding-bottom:22px; border-bottom:1px solid var(--line); margin-bottom:26px; }
+  .hero .eyebrow{ font-size:12px; letter-spacing:.09em; color:var(--teal-strong); font-weight:700; text-transform:uppercase; }
+  .hero h1{ font-size:30px; margin-top:6px; }
+  .hero p{ color:var(--ink-dim); max-width:62ch; margin-top:8px; font-size:14.5px; }
+
+  .stat-row{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:20px;
+  }
+  .stat{
+    background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    padding:14px 16px; box-shadow:var(--shadow);
+    display:flex; flex-direction:column; gap:6px; min-width:0;
+  }
+  .stat .k{ font-size:11px; letter-spacing:.06em; color:var(--ink-faint); font-weight:600; }
+  .stat .v{ font-family:'Noto Serif KR',serif; font-size:19px; font-weight:700; line-height:1.3; }
+  .stat .d{ font-size:12px; color:var(--ink-dim); }
+  .stat.accent{ border-color:var(--amber); background:var(--amber-tint); }
+  .stat.accent .v{ color:var(--amber-strong); }
+
+  /* ---------- Sections ---------- */
+  section{ margin-bottom:46px; scroll-margin-top:20px; }
+  .section-head{ display:flex; align-items:baseline; gap:10px; margin-bottom:16px; }
+  .section-head .idx{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-faint); }
+  .section-head h2{ font-size:20px; }
+  .section-sub{ color:var(--ink-dim); font-size:13.5px; margin:-8px 0 16px; max-width:68ch; }
+
+  /* ---------- Calendar strip ---------- */
+  .month-grid{
+    display:grid; grid-template-columns:repeat(12,1fr); gap:8px;
+  }
+  .month{
+    background:var(--surface); border:1px solid var(--line); border-radius:9px;
+    padding:10px 8px 12px; cursor:pointer; text-align:left;
+    display:flex; flex-direction:column; gap:6px; min-height:92px;
+    font-family:inherit; color:inherit;
+    transition:border-color .15s ease, transform .1s ease;
+  }
+  .month:hover{ border-color:var(--line-strong); transform:translateY(-1px); }
+  .month .bar{ height:3px; border-radius:2px; background:var(--line); }
+  .month.teal .bar{ background:var(--teal); }
+  .month.amber .bar{ background:var(--amber); }
+  .month .num{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-faint); }
+  .month .lbl{ font-size:12.5px; font-weight:600; line-height:1.35; }
+  .month.muted .lbl{ color:var(--ink-faint); font-weight:500; }
+  .month[aria-selected="true"]{ border-color:var(--teal); box-shadow:0 0 0 1px var(--teal); }
+
+  .detail-panel{
+    margin-top:16px; background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:20px 22px; box-shadow:var(--shadow);
+  }
+  .detail-panel h3{ font-size:16px; display:flex; align-items:center; gap:8px; }
+  .detail-panel h3 .tag{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600;
+    padding:2px 7px; border-radius:5px; background:var(--teal-tint); color:var(--teal-strong);
+  }
+  .checklist{ list-style:none; margin:14px 0 0; padding:0; display:flex; flex-direction:column; gap:2px; }
+  .checklist li{ display:flex; align-items:flex-start; gap:10px; padding:7px 6px; border-radius:7px; }
+  .checklist li:hover{ background:var(--surface-2); }
+  .checklist input[type=checkbox]{
+    margin-top:3px; width:15px; height:15px; accent-color:var(--teal); flex:none; cursor:pointer;
+  }
+  .checklist label{ font-size:13.5px; cursor:pointer; }
+  .checklist .note{ display:block; font-size:12px; color:var(--ink-faint); margin-top:1px; }
+  .checklist input:checked + label{ color:var(--ink-faint); text-decoration:line-through; }
+  .progress-line{ display:flex; align-items:center; gap:10px; margin-top:14px; }
+  .progress-track{ flex:1; height:6px; border-radius:4px; background:var(--surface-2); overflow:hidden; }
+  .progress-fill{ height:100%; background:var(--teal); width:0%; transition:width .25s ease; }
+  .progress-line .pct{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-dim); }
+
+  .warn-box{
+    margin-top:14px; padding:10px 12px; border-radius:8px; background:var(--amber-tint);
+    border:1px solid color-mix(in srgb, var(--amber) 35%, transparent);
+    font-size:12.5px; color:var(--amber-strong); display:flex; gap:8px;
+  }
+  .warn-box .m{ flex:none; font-family:'IBM Plex Mono',monospace; font-weight:700; }
+
+  .idle-note{ font-size:13px; color:var(--ink-dim); }
+
+  /* ---------- Promotion timelines ---------- */
+  .promo-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    padding:20px 22px 18px; margin-bottom:14px; box-shadow:var(--shadow);
+  }
+  .promo-card h3{ font-size:15px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .promo-card h3 .scope{ font-size:11.5px; font-weight:600; color:var(--ink-faint); font-family:'Noto Sans KR',sans-serif; }
+  .timeline{ position:relative; height:64px; margin:30px 4px 8px; }
+  .timeline .axis{ position:absolute; left:0; right:0; top:32px; height:2px; background:var(--line-strong); }
+  .timeline .band{ position:absolute; top:28px; height:10px; border-radius:5px; opacity:.85; }
+  .timeline .band.b-teal{ background:var(--teal-tint-strong); }
+  .timeline .band.b-amber{ background:var(--amber-tint); }
+  .timeline .pt{ position:absolute; top:27px; width:12px; height:12px; border-radius:50%; background:var(--surface); border:2.5px solid var(--teal); transform:translateX(-50%); }
+  .timeline .pt.amber{ border-color:var(--amber); }
+  .timeline .lab{ position:absolute; width:150px; text-align:center; transform:translateX(-50%); font-size:11.5px; line-height:1.35; }
+  .timeline .lab.top{ top:-26px; }
+  .timeline .lab.bottom{ top:44px; }
+  .timeline .lab .date{ display:block; font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:12px; color:var(--ink); }
+  .timeline .lab .txt{ display:block; color:var(--ink-dim); font-size:11px; }
+
+  .promo-form{ display:flex; gap:16px; flex-wrap:wrap; margin-top:18px; padding-top:14px; border-top:1px dashed var(--line); }
+  .promo-form div{ font-size:12px; color:var(--ink-dim); }
+  .promo-form b{ display:block; color:var(--ink); font-size:12.5px; font-weight:600; margin-bottom:2px; }
+
+  /* ---------- Calc section ---------- */
+  .calc-grid{ display:grid; grid-template-columns:1.1fr .9fr; gap:16px; align-items:start; }
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:18px 20px; box-shadow:var(--shadow); }
+  .card h3{ font-size:14.5px; margin-bottom:10px; }
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  thead th{ text-align:left; font-size:11px; letter-spacing:.03em; color:var(--ink-faint); font-weight:600; padding:6px 8px; border-bottom:1px solid var(--line-strong); }
+  tbody td{ padding:7px 8px; border-bottom:1px solid var(--line); }
+  tbody tr:last-child td{ border-bottom:none; font-weight:700; background:var(--teal-tint); }
+  tbody tr:last-child td:first-child{ border-radius:7px 0 0 7px; }
+  tbody tr:last-child td:last-child{ border-radius:0 7px 7px 0; }
+  .num-cell{ font-family:'IBM Plex Mono',monospace; text-align:right; }
+  .tablewrap{ overflow-x:auto; }
+  .kv-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+  .kv-list li{ display:flex; flex-direction:column; gap:2px; padding-bottom:10px; border-bottom:1px solid var(--line); }
+  .kv-list li:last-child{ border-bottom:none; padding-bottom:0; }
+  .kv-list .k{ font-size:11.5px; font-weight:600; color:var(--ink-faint); letter-spacing:.02em; }
+  .kv-list .v{ font-size:13px; }
+  .src{ font-size:11px; color:var(--ink-faint); margin-top:2px; }
+  .src .mono{ font-size:10.5px; }
+
+  .example-row{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:14px; }
+  .example{ background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+  .example .t{ font-size:12.5px; font-weight:700; margin-bottom:6px; }
+  .example .eq{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-dim); background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:7px 9px; margin:6px 0; overflow-x:auto; }
+  .example .result{ font-size:12.5px; }
+  .example .result b{ color:var(--teal-strong); }
+
+  .rule-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:14px; }
+  .rule{ background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:13px 14px; font-size:12.5px; }
+  .rule .t{ font-weight:700; margin-bottom:6px; }
+  .rule .eq{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:6px 8px; margin:6px 0; overflow-x:auto; }
+
+  /* ---------- Cases (steps + callouts) ---------- */
+  .case-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .steps{ list-style:none; margin:12px 0 0; padding:0; counter-reset:step; display:flex; flex-direction:column; gap:0; }
+  .steps li{ counter-increment:step; position:relative; padding:0 0 16px 30px; }
+  .steps li::before{
+    content:counter(step); position:absolute; left:0; top:0;
+    width:20px; height:20px; border-radius:50%; background:var(--teal-tint); color:var(--teal-strong);
+    font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .steps li::after{
+    content:''; position:absolute; left:9.5px; top:22px; bottom:0; width:1px; background:var(--line);
+  }
+  .steps li:last-child::after{ display:none; }
+  .steps li:last-child{ padding-bottom:0; }
+  .steps .who{ font-size:11px; font-weight:700; color:var(--ink-faint); letter-spacing:.03em; }
+  .steps .body{ font-size:13px; margin-top:2px; }
+
+  .callout{ background:var(--amber-tint); border:1px solid color-mix(in srgb, var(--amber) 30%, transparent); border-radius:10px; padding:14px 16px; margin-top:12px; }
+  .callout .t{ font-size:12.5px; font-weight:700; color:var(--amber-strong); margin-bottom:4px; }
+  .callout p{ margin:0; font-size:12.5px; color:var(--ink); }
+  .callout .cite{ display:block; margin-top:6px; font-size:11px; color:var(--ink-faint); }
+
+  .bullets{ list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:9px; }
+  .bullets li{ font-size:13px; padding-left:14px; position:relative; }
+  .bullets li::before{ content:'—'; position:absolute; left:0; color:var(--ink-faint); }
+
+  /* ---------- Refs ---------- */
+  .ref-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .ref-item{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:12px 14px; display:flex; flex-direction:column; gap:3px; }
+  .ref-item .t{ font-size:13px; font-weight:600; }
+  .ref-item .p{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-dim); }
+
+  footer{ margin-top:40px; padding-top:18px; border-top:1px solid var(--line); font-size:11.5px; color:var(--ink-faint); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+
+  @media (max-width:880px){
+    .app{ grid-template-columns:1fr; }
+    nav.side{ position:sticky; top:0; height:auto; flex-direction:row; align-items:center; overflow-x:auto; padding:12px 16px; gap:16px; border-right:none; border-bottom:1px solid var(--line); background:var(--ground); z-index:5; }
+    .brand{ flex:none; }
+    .side-links{ flex-direction:row; }
+    .side-links a{ white-space:nowrap; }
+    .side-refs{ display:none; }
+    main{ padding:20px 16px 48px; }
+    .stat-row{ grid-template-columns:repeat(2,1fr); }
+    .month-grid{ grid-template-columns:repeat(4,1fr); }
+    .calc-grid, .case-grid, .example-row{ grid-template-columns:1fr; }
+    .rule-grid{ grid-template-columns:1fr; }
+    .ref-grid{ grid-template-columns:1fr; }
+    .timeline .lab{ width:110px; font-size:10.5px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="side" aria-label="목차">
+    <div class="brand">
+      <span class="eyebrow">원주시정신건강복지센터 · 운영팀</span>
+      <span class="name">휴무관리 대시보드</span>
+    </div>
+    <ul class="side-links">
+      <li><a href="#calendar"><span class="num">01</span> 연간 업무 캘린더</a></li>
+      <li><a href="#promotion"><span class="num">02</span> 연차사용 촉진</a></li>
+      <li><a href="#calc"><span class="num">03</span> 연차 계산 기준</a></li>
+      <li><a href="#cases"><span class="num">04</span> 퇴사·신규·예외</a></li>
+      <li><a href="#refs"><span class="num">05</span> 참고 문서·시스템</a></li>
+    </ul>
+    <div class="side-refs">
+      <div class="h">빠른 참조</div>
+      <ul>
+        <li>휴무 규정<span class="path">운영정관</span></li>
+        <li>연차 부여<span class="path">지오유 &gt; 관리자 &gt; 근태관리 &gt; 연차수 관리</span></li>
+        <li>연차 계산기<span class="path">팀박스 &gt; 2024행정 &gt; 직원연차관리</span></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <span class="eyebrow">연차 · 장기근속휴가 운영 매뉴얼</span>
+      <h1>휴무관리 대시보드</h1>
+      <p>연차·보상휴가·장기근속휴가의 부여부터 결산, 사용 촉진, 퇴사자 정산까지 — 회계연도를 축으로 반복되는 운영팀 실무 흐름을 한 화면에 정리했습니다.</p>
+
+      <div class="stat-row" id="stat-row">
+        <div class="stat accent">
+          <span class="k">다음 마감</span>
+          <span class="v" id="next-label">—</span>
+          <span class="d" id="next-detail">계산 중…</span>
+        </div>
+        <div class="stat">
+          <span class="k">정기 부여</span>
+          <span class="v">매년 12월</span>
+          <span class="d">연차·장기근속휴가 부여, 근무상황부 파일철 구성</span>
+        </div>
+        <div class="stat">
+          <span class="k">전년도 결산</span>
+          <span class="v">매년 1월</span>
+          <span class="d">휴무내역·연차실적 출력 후 근무상황부 보관</span>
+        </div>
+        <div class="stat">
+          <span class="k">법적 근거</span>
+          <span class="v mono">근로기준법 §61</span>
+          <span class="d">연차 유급휴가의 사용 촉진</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 01 캘린더 -->
+    <section id="calendar">
+      <div class="section-head"><span class="idx">01</span><h2>연간 업무 캘린더</h2></div>
+      <p class="section-sub">월을 선택하면 아래에 세부 체크리스트가 표시됩니다. 진한 색은 정기 업무, 옅은 색은 촉진 마감이 걸린 달입니다.</p>
+
+      <div class="month-grid" id="month-grid" role="tablist" aria-label="월별 업무"></div>
+
+      <div class="detail-panel" id="detail-panel"></div>
+    </section>
+
+    <!-- 02 촉진 -->
+    <section id="promotion">
+      <div class="section-head"><span class="idx">02</span><h2>연차사용 촉진 프로세스</h2></div>
+      <p class="section-sub">근로기준법 제61조에 따른 2단계 촉진 절차입니다. 절차를 모두 이행하면 미사용 연차에 대한 금전 보상 의무가 면제됩니다.</p>
+
+      <div class="promo-card">
+        <h3>1년 이상 근로자 <span class="scope">회계연도 기준(1/1~12/31) 연차 부여 시</span></h3>
+        <div class="timeline">
+          <div class="axis"></div>
+          <div class="band b-teal" style="left:14.1%; width:9%"></div>
+          <div class="pt" style="left:14.1%"></div>
+          <div class="lab top" style="left:14.1%"><span class="date">7/1</span><span class="txt">1차촉진 시작</span></div>
+          <div class="pt" style="left:23%"></div>
+          <div class="lab bottom" style="left:23%"><span class="date">7/20</span><span class="txt">계획서 제출 마감</span></div>
+          <div class="pt amber" style="left:71.4%"></div>
+          <div class="lab top" style="left:71.4%"><span class="date">10/31</span><span class="txt">2차촉진 마감</span></div>
+          <div class="pt" style="left:100%"></div>
+          <div class="lab bottom" style="left:calc(100% - 20px)"><span class="date">12/31</span><span class="txt">연차 소멸</span></div>
+        </div>
+        <div class="promo-form">
+          <div><b>사용자 → 근로자, 1차</b>7/1~7/10 사이 미사용 연차일수 고지, 사용시기 통보 요구</div>
+          <div><b>근로자 → 사용자</b>1차 촉진일로부터 10일 이내 연차휴가사용계획서 제출(~7/20)</div>
+          <div><b>사용자 → 근로자, 2차</b>제출이 없으면 10/31까지 사용시기 지정 통보</div>
+        </div>
+      </div>
+
+      <div class="promo-card">
+        <h3>1년 미만 근로자 — 처음 발생 9개 <span class="scope">입사일 1/1 기준 예시</span></h3>
+        <div class="timeline">
+          <div class="axis"></div>
+          <div class="band b-teal" style="left:0%; width:9.9%"></div>
+          <div class="pt" style="left:0%"></div>
+          <div class="lab top" style="left:20px"><span class="date">10/1</span><span class="txt">1차촉진 시작</span></div>
+          <div class="pt" style="left:20.9%"></div>
+          <div class="lab bottom" style="left:20.9%"><span class="date">10/20</span><span class="txt">계획서 제출 마감</span></div>
+          <div class="pt amber" style="left:65.9%"></div>
+          <div class="lab top" style="left:65.9%"><span class="date">11/30</span><span class="txt">2차촉진 마감</span></div>
+          <div class="pt" style="left:100%"></div>
+          <div class="lab bottom" style="left:calc(100% - 24px)"><span class="date">12/31</span><span class="txt">근로 1년 종료</span></div>
+        </div>
+        <div class="promo-form">
+          <div><b>1차 촉진</b>최초 1년 근로기간 종료 3개월 전, 10/1~10/10</div>
+          <div><b>계획서 제출</b>1차 촉진일로부터 10일 이내, ~10/20</div>
+          <div><b>2차 촉진</b>최초 1년 근로기간 끝나기 1개월 전까지</div>
+        </div>
+      </div>
+
+      <div class="promo-card">
+        <h3>1년 미만 근로자 — 나머지 2개 <span class="scope">처음 9개 이후 별도 촉진 필요</span></h3>
+        <div class="timeline">
+          <div class="axis"></div>
+          <div class="band b-teal" style="left:0%; width:13.3%"></div>
+          <div class="pt" style="left:0%"></div>
+          <div class="lab top" style="left:20px"><span class="date">12/1</span><span class="txt">1차촉진 시작</span></div>
+          <div class="pt" style="left:46.7%"></div>
+          <div class="lab bottom" style="left:46.7%"><span class="date">12/15</span><span class="txt">계획서 제출 마감</span></div>
+          <div class="pt amber" style="left:66.7%"></div>
+          <div class="lab top" style="left:66.7%"><span class="date">12/21</span><span class="txt">2차촉진 마감</span></div>
+          <div class="pt" style="left:100%"></div>
+          <div class="lab bottom" style="left:calc(100% - 20px)"><span class="date">12/31</span><span class="txt">근로 1년 종료</span></div>
+        </div>
+        <div class="promo-form">
+          <div><b>1차 촉진</b>연차휴가 사용 만료일 1개월 전, 12/1~12/5</div>
+          <div><b>계획서 제출</b>1차 촉진일로부터 10일 이내, ~12/15</div>
+          <div><b>2차 촉진</b>최초 1년 근로기간 끝나기 10일 전까지</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>사용 양식</h3>
+        <ul class="bullets">
+          <li>서면촉구 양식 — 관리자 &gt; 근태관리 &gt; 휴무관리 &gt; 연차사용촉진</li>
+          <li>1차 촉진 결재 양식 — <span class="mono">[10.연차사용계획서]</span></li>
+          <li>2차 촉진 결재 양식 — <span class="mono">[8.잔여연차사용신청서]</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 03 계산 -->
+    <section id="calc">
+      <div class="section-head"><span class="idx">03</span><h2>연차 계산 기준</h2></div>
+      <p class="section-sub">근속년수 기산은 <b>비례-15-15-16</b>(법상 최소 기준)을 센터 초기설정으로 적용하며, 입사 첫해는 근속년수에 포함하지 않습니다.</p>
+
+      <div class="calc-grid">
+        <div class="card">
+          <h3>근무년차별 휴가 발생 예시</h3>
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th>근무년차</th><th>휴가 발생 일자</th><th style="text-align:right">발생 일수</th></tr></thead>
+              <tbody>
+                <tr><td>1년차 미만(월차)</td><td>매월 만근 시 1일</td><td class="num-cell">8</td></tr>
+                <tr><td>2년차</td><td class="mono">2022-01-01</td><td class="num-cell">11.25</td></tr>
+                <tr><td>2년차(월차)</td><td>매월 1일</td><td class="num-cell">3</td></tr>
+                <tr><td>3년차</td><td class="mono">2023-01-01</td><td class="num-cell">15</td></tr>
+                <tr><td>4년차</td><td class="mono">2024-01-01</td><td class="num-cell">15</td></tr>
+                <tr><td>합계</td><td></td><td class="num-cell">52.25</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="src">연차계산기 — <span class="mono">팀박스 &gt; 2024행정 &gt; 직원연차관리 &gt; (양식)연차계산기</span></p>
+        </div>
+
+        <div class="card">
+          <h3>처리 기준</h3>
+          <ul class="kv-list">
+            <li><span class="k">소수점 처리</span><span class="v">반일단위 올림 — 주간근로자는 반일단위, 교대근무자·단축근로자는 시간단위로 계산</span></li>
+            <li><span class="k">퇴직 정산</span><span class="v">입사일 기준으로 재계산하여 정산</span></li>
+            <li><span class="k">출산·육아 관련</span><span class="v">출산휴가, 육아휴직, 육아기·임신기 단축근로는 근로시간으로 간주하여 계산</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h3>퇴직 정산 예시 — 회계연도 기준과 입사일 기준의 차이 조정</h3>
+        <div class="example-row">
+          <div class="example">
+            <div class="t">예시 1 · 초과 부여분 환수</div>
+            <div class="eq">회계연도 31일 발생 vs 입사일 26일 발생 (+5)
+올해 부여 15일 · 사용 11일</div>
+            <div class="result">입사일 기준보다 5일 더 부여했으므로 올해 정당 부여는 <b>10일</b>. 11일을 사용해 1일 초과 사용 — <b>1일분 급여 환수</b>.</div>
+          </div>
+          <div class="example">
+            <div class="t">예시 2 · 잔여일수 정산 후 퇴사</div>
+            <div class="eq">회계연도 31일 발생 vs 입사일 35일 발생 (−4)
+올해 부여 15일 · 사용 10일</div>
+            <div class="result">입사일 기준보다 4일 덜 부여했으므로 올해 총 정당 부여는 <b>19일</b>. 10일 사용 후 <b>9일 사용하고 퇴사</b> 가능.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h3>연 80% 이상 근로 기준 — 소정근로일 대비 출근율</h3>
+        <p class="section-sub" style="margin-bottom:0">2024년 소정근로일 247일 기준 · 20% = 49일</p>
+        <div class="rule-grid">
+          <div class="rule">
+            <div class="t">상황 1 · 연중 입사</div>
+            <div>2월 입사자는 회계연도 기준 비례로 계산 후 퇴사 시 정산</div>
+            <div class="eq">15 × (11 / 12)</div>
+          </div>
+          <div class="rule">
+            <div class="t">상황 2 · 단축근로 20% 이내</div>
+            <div>30일간 하루 6시간 단축근로 — 연간 단축시간이 20% 이내이므로</div>
+            <div class="eq">15일 전량 제공</div>
+          </div>
+          <div class="rule">
+            <div class="t">상황 3 · 단축근로 20% 초과</div>
+            <div>60일간 하루 6시간 단축근로 — 20% 이상이므로 비례 시간 계산</div>
+            <div class="eq">{15×(60/247)×6}
++{15×(187/247)×8}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 사례 -->
+    <section id="cases">
+      <div class="section-head"><span class="idx">04</span><h2>퇴사자 · 신규(1년 미만) · 예외사항</h2></div>
+
+      <div class="case-grid">
+        <div class="card">
+          <h3>퇴사자 연차 처리</h3>
+          <ol class="steps">
+            <li><span class="who">근로자</span><span class="body">퇴사 1개월 전 행정 및 회계에 통보</span></li>
+            <li><span class="who">행정</span><span class="body">입사일 기준으로 연차 재계산, 그룹웨어 당해연도 연차수 변경 후 퇴사자에게 안내 — 남은 연차 사용 신청 안내</span></li>
+            <li><span class="who">행정</span><span class="body">퇴사 처리 전 휴무내역을 출력하여 근무상황부에 보관</span></li>
+            <li><span class="who">회계</span><span class="body">사용 연차가 부여 연차보다 많으면 1할 계산하여 처리</span></li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <h3>입사 1년 미만자 연차(월차) 관리</h3>
+          <ul class="bullets">
+            <li>신규 입사 시 엑셀 연차대장·개인별 연차대장 작성</li>
+            <li>그룹웨어는 입사 다다음월부터 월차 발생</li>
+            <li>법상 1개월 만근 시 월차가 발생해야 하므로, 1년 미만자는 부여된 월차보다 1일 초과하여 상신 가능(잔여일수 −1일)</li>
+            <li>다음 해에 이월된 월차와 회계연도 기준 연차를 합산 부여 — 메모 기능으로 월차·연차 구분</li>
+            <li>연차사용 촉진에도 사용하지 않은 연차는 최초 입사 1개월 후 월차 소멸 (법상 소멸시점보다 센터 부여시점이 1개월 늦어 소멸기간도 1개월 순연)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="t">예외 — 출산·육아휴직자의 연차 당겨쓰기 / 이월</div>
+        <p>출산 등 휴직자 발생 시 연차를 당겨쓰거나 이월하는 상황이 생길 수 있어, 미리 연차 계획을 받아 엑셀 대장 및 그룹웨어에 반영합니다. 출산·육아휴직으로 이듬해 상당 기간 근로가 발생하지 않는 경우 협의에 따라 연차를 당겨쓸 수 있으며, 휴직으로 이월된 연차는 복직한 해에 모두 소진하도록 합니다.</p>
+        <span class="cite">2024.8.14. 팀장회의 결정</span>
+      </div>
+
+      <div class="callout">
+        <div class="t">예외 — 퇴직일이 확정된 대체인력(단기계약)</div>
+        <p>1년 이상 단기계약으로 회계연도 기준 연차를 산정하면 효율적인 연차 활용이 어렵습니다. 이듬해 1월 1일 회계연도 기준으로 우선 반영한 뒤, 입사 1년이 지난 다음 달에 입사일 기준으로 재계산하여 그룹웨어에 나머지 연차를 부여하고 연차사용계획서를 제출받습니다.</p>
+      </div>
+    </section>
+
+    <!-- 05 참고자료 -->
+    <section id="refs">
+      <div class="section-head"><span class="idx">05</span><h2>참고 문서 · 시스템 경로</h2></div>
+      <div class="ref-grid">
+        <div class="ref-item"><span class="t">휴무 관련 규정</span><span class="p">운영정관</span></div>
+        <div class="ref-item"><span class="t">근무상황부</span><span class="p">개인별 연차대장 · 휴무내역 출력물 보관 파일철</span></div>
+        <div class="ref-item"><span class="t">그룹웨어 연차 부여</span><span class="p">지오유 &gt; 관리자 &gt; 근태관리 &gt; 연차수 관리</span></div>
+        <div class="ref-item"><span class="t">비연차휴무량 관리</span><span class="p">지오유 &gt; 근태관리 &gt; 장기근속휴가</span></div>
+        <div class="ref-item"><span class="t">직원현황 게시판</span><span class="p">지오유 &gt; 게시판 &gt; 직원현황</span></div>
+        <div class="ref-item"><span class="t">연차사용촉진 양식</span><span class="p">관리자 &gt; 근태관리 &gt; 휴무관리 &gt; 연차사용촉진</span></div>
+        <div class="ref-item"><span class="t">연차계산기</span><span class="p">팀박스 &gt; 2024행정 &gt; 직원연차관리 &gt; (양식)연차계산기</span></div>
+        <div class="ref-item"><span class="t">법적 근거</span><span class="p">근로기준법 제61조(연차 유급휴가의 사용 촉진)</span></div>
+      </div>
+    </section>
+
+    <footer>
+      <span>원주시정신건강복지센터 운영팀 · 휴무 관리(연차, 장기근속휴가) 매뉴얼 기반</span>
+      <span>체크리스트는 이 브라우저에만 저장되며 매년 1월 자동 초기화됩니다</span>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  var YEAR = new Date().getFullYear();
+
+  var months = [
+    {n:1, type:'teal', label:'연차·보상휴가 결산', detailKey:'jan'},
+    {n:2, type:'muted', label:'수시 대응'},
+    {n:3, type:'muted', label:'수시 대응'},
+    {n:4, type:'muted', label:'수시 대응'},
+    {n:5, type:'muted', label:'수시 대응'},
+    {n:6, type:'muted', label:'수시 대응'},
+    {n:7, type:'amber', label:'연차촉진 1차·계획서', detailKey:'jul'},
+    {n:8, type:'muted', label:'수시 대응'},
+    {n:9, type:'muted', label:'수시 대응'},
+    {n:10, type:'amber', label:'연차촉진 2차 마감', detailKey:'oct'},
+    {n:11, type:'muted', label:'수시 대응'},
+    {n:12, type:'teal', label:'연차·장기근속휴가 부여', detailKey:'dec'},
+  ];
+
+  var details = {
+    dec: {
+      title:'12월 — 연차 및 보상휴가 부여', tag:'매년 12월 · 신규 입사자 발생 시',
+      items:[
+        ['dec-1','이듬해 근무상황부 파일철 만들기'],
+        ['dec-2','엑셀 연차대장 생성'],
+        ['dec-3','개인별 연차대장 생성 후 출력 — 근무상황부 왼편에 보관'],
+        ['dec-4','그룹웨어 연차 부여 (이듬해로 연도 수정 시 부여 가능)'],
+        ['dec-5','그룹웨어 장기근속휴가 부여, 출력하여 근무상황부 왼편 보관'],
+        ['dec-6','신규 입사자 발생 시 엑셀 연차대장·개인별 연차대장 작성', '해당 시에만 체크']
+      ]
+    },
+    jan: {
+      title:'1월 — 연차 및 보상휴가 결산', tag:'매년 1월 · 전년도 실적',
+      items:[
+        ['jan-1','그룹웨어 &gt; 근태관리 &gt; 근태확인 및 제출 &gt; 개인별 휴무내역 확인'],
+        ['jan-2','그룹웨어 &gt; 관리자 &gt; 근태관리 &gt; 휴무관리 &gt; 연차수관리 &gt; 전년도 실적 엑셀 저장'],
+        ['jan-3','전년도 개인별 휴무내역·연차 실적 출력하여 근무상황부에 보관']
+      ],
+      warn:'일단위 보기는 사용연차·잔여연차 값에 오류(−0.01~0.06)가 발생할 수 있습니다. 반드시 분단위 보기로 출력하세요.'
+    },
+    jul: {
+      title:'7월 — 연차사용 촉진 (1년 이상 근로자)', tag:'7/1 ~ 10/31',
+      idle:'7/1~7/10 1차 촉진, ~7/20 근로자 계획서 제출, ~10/31 2차 촉진까지 이어지는 절차입니다. 세부 일정과 양식은 아래 "02 연차사용 촉진" 섹션을 확인하세요.'
+    },
+    oct: {
+      title:'10월 — 연차사용 촉진 마감', tag:'1년 이상 2차촉진 · 1년 미만 1차촉진',
+      idle:'1년 이상 근로자의 2차 촉진 마감(10/31)과, 1년 미만 근로자(처음 9개)의 1차 촉진(10/1~10/10)이 겹치는 달입니다. 세부 일정은 "02 연차사용 촉진" 섹션을 확인하세요.'
+    }
+  };
+
+  var grid = document.getElementById('month-grid');
+  var panel = document.getElementById('detail-panel');
+  var storeKey = function(id){ return 'leave-dashboard-' + YEAR + '-' + id; };
+
+  function renderDetail(key){
+    var d = details[key];
+    if(!d) return;
+    var html = '<h3>' + d.title + ' <span class="tag">' + d.tag + '</span></h3>';
+    if(d.items){
+      html += '<ul class="checklist" data-key="'+key+'">';
+      d.items.forEach(function(it){
+        var id = it[0], label = it[1], note = it[2];
+        html += '<li><input type="checkbox" id="'+id+'" data-store="'+storeKey(id)+'">'+
+                '<label for="'+id+'">'+label+(note?'<span class="note">'+note+'</span>':'')+'</label></li>';
+      });
+      html += '</ul>';
+      html += '<div class="progress-line"><div class="progress-track"><div class="progress-fill" id="pf-'+key+'"></div></div><span class="pct" id="pct-'+key+'">0 / 0</span></div>';
+      if(d.warn){ html += '<div class="warn-box"><span class="m">!</span><span>'+d.warn+'</span></div>'; }
+    } else if(d.idle){
+      html += '<p class="idle-note">'+d.idle+'</p>';
+    }
+    panel.innerHTML = html;
+
+    if(d.items){
+      var boxes = panel.querySelectorAll('.checklist input[type=checkbox]');
+      function updateProgress(){
+        var total = boxes.length, checked = 0;
+        boxes.forEach(function(b){ if(b.checked) checked++; });
+        var fill = document.getElementById('pf-'+key);
+        var pct = document.getElementById('pct-'+key);
+        if(fill) fill.style.width = (total? (checked/total*100):0) + '%';
+        if(pct) pct.textContent = checked + ' / ' + total;
+      }
+      boxes.forEach(function(b){
+        try{ b.checked = localStorage.getItem(b.dataset.store) === '1'; }catch(e){}
+        b.addEventListener('change', function(){
+          try{ localStorage.setItem(b.dataset.store, b.checked ? '1':'0'); }catch(e){}
+          updateProgress();
+        });
+      });
+      updateProgress();
+    }
+  }
+
+  months.forEach(function(m, i){
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'month ' + m.type;
+    btn.setAttribute('role','tab');
+    btn.setAttribute('aria-selected', m.n === 12 ? 'true':'false');
+    btn.innerHTML = '<span class="bar"></span><span class="num">'+String(m.n).padStart(2,'0')+'월</span><span class="lbl">'+m.label+'</span>';
+    btn.addEventListener('click', function(){
+      grid.querySelectorAll('.month').forEach(function(x){ x.setAttribute('aria-selected','false'); });
+      btn.setAttribute('aria-selected','true');
+      renderDetail(m.detailKey || 'dec');
+    });
+    grid.appendChild(btn);
+  });
+  renderDetail('dec');
+
+  // ---- next-deadline countdown ----
+  var milestones = [
+    [7,1,'1차촉진 시작','1년 이상 근로자 · 미사용 연차 고지'],
+    [7,10,'1차촉진 마감','1년 이상 근로자'],
+    [7,20,'계획서 제출 마감','1년 이상 근로자 · 연차휴가사용계획서'],
+    [10,1,'1차촉진 시작','1년 미만 근로자 · 처음 발생 9개'],
+    [10,10,'1차촉진 마감 / 제출 시작','1년 미만 근로자 · 처음 발생 9개'],
+    [10,20,'계획서 제출 마감','1년 미만 근로자 · 처음 발생 9개'],
+    [10,31,'2차촉진 마감','1년 이상 근로자'],
+    [12,1,'파일철 준비 시작 · 1차촉진 시작','이듬해 연차부여 준비 · 1년 미만 나머지 2개'],
+    [12,5,'1차촉진 마감','1년 미만 근로자 · 나머지 2개'],
+    [12,15,'계획서 제출 마감','1년 미만 근로자 · 나머지 2개'],
+    [12,21,'2차촉진 마감','1년 미만 근로자 · 나머지 2개'],
+    [12,31,'연차·장기근속휴가 부여 완료','회계연도 기준 정기 부여']
+  ];
+
+  function findNext(today){
+    var y = today.getFullYear();
+    var best = null, bestDiff = Infinity;
+    [y, y+1].forEach(function(yy){
+      milestones.forEach(function(m){
+        var d = new Date(yy, m[0]-1, m[1]);
+        var diff = Math.round((d - today) / 86400000);
+        if(diff >= 0 && diff < bestDiff){ bestDiff = diff; best = {date:d, label:m[2], detail:m[3], diff:diff}; }
+      });
+    });
+    return best;
+  }
+
+  var today = new Date();
+  var next = findNext(today);
+  if(next){
+    document.getElementById('next-label').textContent = next.label;
+    var when = (next.date.getMonth()+1) + '/' + next.date.getDate();
+    var dday = next.diff === 0 ? '오늘' : ('D-' + next.diff);
+    document.getElementById('next-detail').textContent = next.detail + ' · ' + when + ' (' + dday + ')';
+  }
+})();
+</script>
+</body>
+</html>
