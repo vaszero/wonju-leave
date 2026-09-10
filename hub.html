@@ -1,0 +1,418 @@
+<title>정신건강센터 AI 허브</title>
+<style>
+  :root{--navy:#1f3a5f;--ink:#1d2430;--mute:#5f6b7a;--line:#d9e0e8;--bg:#f6f8fb;--card:#fff;--soft:#eef2f7;--ok:#e8f4ea;--accent:#2b6cb0}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Malgun Gothic","맑은 고딕",Pretendard,-apple-system,system-ui,sans-serif;font-size:16px;color:var(--ink);background:var(--bg);line-height:1.6}
+  header{background:var(--navy);color:#fff;padding:20px 20px 22px}
+  header .wrap{max-width:940px;margin:0 auto}
+  header .brand{display:inline-flex;align-items:center;gap:9px;font-size:12.5px;font-weight:bold;letter-spacing:.13em;color:#a9c8ea;text-decoration:none}
+  header .brand:hover{color:#fff}
+  header .brand:hover::before{background:#fff}
+  header .brand:focus-visible{outline:2px solid #a9c8ea;outline-offset:4px;border-radius:4px}
+  header .brand::before{content:"";width:20px;height:2px;background:#6fa4dd;border-radius:2px}
+  header .titles{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-top:11px;padding-top:11px;border-top:1px solid rgba(255,255,255,.14)}
+  header h1{margin:0;font-size:23px;letter-spacing:-.2px}
+  header p{margin:0;font-size:13px;opacity:.85}
+  header .prog{margin-left:auto;font-size:13px;opacity:.85;white-space:nowrap}
+  main{max-width:940px;margin:0 auto;padding:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:0 0 14px}
+  .card h2{margin:0 0 6px;font-size:18px;color:var(--navy)}
+  .goal{background:var(--soft);border-radius:8px;padding:10px 12px;font-size:14px;margin:8px 0}
+  ol,ul{margin:6px 0 6px 20px;padding:0}li{margin:4px 0}
+  .meta{font-size:13px;color:var(--mute);margin-bottom:8px}
+  .files a,.files span,.files button.dl{display:inline-block;margin:4px 6px 0 0;padding:5px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;text-decoration:none;color:var(--accent);background:#fff;font:inherit;cursor:pointer}
+  .files span{color:var(--mute);border-style:dashed;cursor:default}
+  .files button.dl:hover{border-color:var(--accent)}
+  .files button.dl.done{color:#1f6b35;border-color:#9fc9a8;background:var(--ok)}
+  .check{margin-top:10px;font-size:14px}.check label{display:block;padding:4px 0;cursor:pointer}
+  .check input{margin-right:8px;transform:scale(1.15)}
+  .done{border-color:#9fc9a8;background:var(--ok)}
+  .prompt{background:#f3f5f8;border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:8px 0;font-family:Consolas,"D2Coding",monospace;font-size:13px;line-height:1.65;white-space:pre-wrap;overflow-x:auto;max-height:360px;overflow-y:auto}
+  button.copy{font:inherit;font-size:13px;color:var(--accent);background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
+  button.copy:hover{border-color:var(--accent)}
+  button.copy.copied{color:#1f6b35;border-color:#9fc9a8;background:var(--ok)}
+  .card[data-lesson]>h2{cursor:pointer;display:flex;align-items:baseline;gap:8px}
+  .card[data-lesson]>h2::before{content:"\25B8";flex:none;color:var(--mute);font-size:14px;display:inline-block;transition:transform .15s ease}
+  .card[data-lesson].open>h2::before{transform:rotate(90deg)}
+  .card[data-lesson]:not(.open)>:not(h2):not(.goal){display:none}
+  .card[data-lesson]>h2:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:6px}
+  @media(prefers-reduced-motion:reduce){.card[data-lesson]>h2::before{transition:none}}
+  footer{max-width:940px;margin:10px auto 40px;padding:0 20px;font-size:12px;color:var(--mute)}
+</style>
+
+<header><div class="wrap">
+  <a class="brand" href="https://www.kailea.kr/" target="_blank" rel="noopener">한국AI평생교육협회</a>
+  <div class="titles">
+    <h1>2일차 실습 허브</h1>
+    <p>복사해서 바로 쓰는 프롬프트와 자료</p>
+    <span class="prog" id="prog"></span>
+  </div>
+</div></header>
+<main>
+
+  <div class="card">
+    <h2>쓰는 법</h2>
+    <div class="goal">각 카드의 <b>제목을 누르면</b> 펼쳐집니다. 프롬프트는 <b>프롬프트 복사</b>를 눌러 Claude에 붙여넣고, 대괄호와 빈칸을 내 상황으로 바꿔 보내세요.</div>
+    <ul>
+      <li>순서대로 할 필요는 없습니다. <b>②③</b>부터 하시면 오늘 스킬 실습이 먼저 잡힙니다</li>
+      <li>체크 표시는 이 브라우저에만 저장되고, 다른 사람에게 보이지 않습니다</li>
+      <li>센터 자료를 넣을 때는 개인정보와 미공개 정보를 먼저 지우세요</li>
+    </ul>
+  </div>
+
+  <div class="card" data-lesson="p1">
+    <h2>① 5단계 비교 · 프로젝트 만들기 (1교시)</h2>
+    <div class="goal">채팅 → 챗봇 → 스킬 → 코워크 → 코드, 다섯 단계가 무엇을 기억하고 무엇을 만드는지 비교합니다.</div>
+    <ul>
+      <li><b>채팅</b> — 자료·규칙·요청을 매번 전부 알려줘야 하고, 결과는 답 하나뿐. 예: "이 계획안 문장 다듬어 줘"</li>
+      <li><b>챗봇</b> — 요청만 하면 되고, 자료·배경을 기억한다(그 방 안에서만). 예: 지식베이스를 넣은 '센터 문서방'</li>
+      <li><b>스킬</b> — 파일만 주면 되고, 일하는 규칙·순서를 기억한다(어느 방에서든). 예: <code>/계획안</code> → 규칙 블록 자동 적용</li>
+      <li><b>코워크</b> — 업무의 끝 한 줄만 주면, 폴더 전체를 기억하고 파일로 완성한다. 예: "3개 사업 결과보고서, 폴더에 만들어 줘"</li>
+      <li><b>코드</b> — 만들고 싶은 도구를 말하면 저장소로 앱을 완성한다 — 오늘 7교시에 실습</li>
+    </ul>
+    <p class="meta">오늘의 한 문장 — "답을 요청하지 말고 결과를 요청한다." 채팅은 답을 받고, 챗봇은 설명을 안 하고, 스킬은 방식을 안 알려주고, 코워크는 내가 일을 덜한다.</p>
+    <div class="check" data-key="p1"><label><input type="checkbox">5단계 비교 이해</label></div>
+  </div>
+
+  <div class="card" data-lesson="p2">
+    <h2>② 회의록 스킬 center-minutes 만들기 (2교시 · 15분)</h2>
+    <div class="goal">규칙 블록을 스킬로 바꿔, 녹취 텍스트를 hwpx 회의록으로 자동 정리한다.</div>
+    <ol>
+      <li>설정 → 사용자 지정 → 스킬 → 추가 → 스킬 만들기</li>
+      <li>이름칸에 <code>center-minutes</code> 입력</li>
+      <li>설명칸에 아래 <b>S-1</b>, 지침칸에 <b>S-2</b>를 복사해서 붙여넣기</li>
+      <li>'만들기' → 새 채팅에서 <code>/center-minutes</code> + 아래 재료(녹취)를 붙여넣고 확인</li>
+    </ol>
+    <p class="meta"><b>S-1 — 스킬 설명</b></p>
+    <div class="prompt" id="p-s1">센터 회의 녹취(클로바노트 텍스트)를 붙여넣으면 잡담을 걸러내고 화자를 직위로 정리해 결정·미결·향후 일정 형식의 회의록을 hwpx 파일로 만든다.</div>
+    <div class="files"><button type="button" class="copy" data-target="p-s1">프롬프트 복사</button></div>
+
+    <p class="meta" style="margin-top:12px"><b>S-2 — 지침 다섯 덩어리</b></p>
+    <div class="prompt" id="p-s2">① 화자 정리
+호칭과 발언 내용으로 직위를 추정해서 표시한다. 실명은 쓰지 않는다. 추정한 직위 뒤에는 항상 "(추정)"을 붙인다.
+
+② 걸러낼 것
+잡담·반복·추임새는 제거한다. 단, 잡담처럼 보여도 일정(날짜·시간)이 섞여 있으면 남긴다.
+
+③ 구성
+항상 "개요 → 논의 → 결정 → 미결 → 향후 일정 → 집계 한 줄" 순서로 정리한다.
+
+④ 판단 규칙
+결정은 "무엇을·누가·언제까지"가 모두 있어야 결정으로 본다. "확인했다", "그대로 하기로" 같은 발언은 결정이 아니라 확인이므로 결정 표에 넣지 않는다.
+
+⑤ 출력
+항상 hwpx 파일로 만든다. 채팅창에는 결정 건수와 미결 건수만 요약해서 보여준다.</div>
+    <div class="files"><button type="button" class="copy" data-target="p-s2">프롬프트 복사</button></div>
+
+    <p class="meta" style="margin-top:12px"><b>재료 — 연습용 녹취 텍스트</b> (함정: 화자 표시 없음 · 커피·점심 같은 잡담 · "강사료 그대로예요"는 결정이 아니라 확인 · 캠페인 장소는 미결로 남겨야 함)</p>
+    <div class="prompt" id="p-material">자, 시작할까요. 다 오셨죠. 아 커피 드셨어요? 아래 카페 오늘 문 닫았더라고요. 네 그럼 오늘 안건이 세 개죠. 게이트키퍼 교육 일정하고, 치료비 지원 예산 집행 현황하고, 그 다음에 다음 달 캠페인. 팀장님이 먼저 교육 쪽 해주세요.
+
+네. 게이트키퍼 교육이요, 원래 5월 14일이었는데 강사님이 그날 도교육청 일정이 잡혔대요. 그래서 21일이나 28일로 옮겨야 되는데. 28일은 저희 사례관리 회의랑 겹치고요. 그럼 21일로 가죠. 21일 목요일 맞죠? 네 목요일이요. 아 근데 21일이면 교육실 예약이... 그건 제가 확인해볼게요. 제가 사례관리 쪽인데 그날 오후는 저희 비어요. 오전만 아니면 돼요. 그럼 오후 2시로. 네 2시요.
+
+통반장 모집은 몇 명이에요 지금. 지금 19명이요. 30명 목표인데. 음. 면사무소에 공문 다시 보내야 되나. 저번에 보낸 게 3월인데 반응이 없어서요. 그러면 공문 한 번 더 보내고, 이번엔 전화도 같이 돌리죠. 전화는 누가... 제가 할게요, 사례관리 쪽에서 면사무소랑 원래 통화 자주 하니까. 네 그럼 그렇게 하고. 언제까지요? 교육 2주 전이니까 5월 7일까지는 명단이 나와야죠. 네.
+
+아 잠깐, 그 강사님 강사료 그대로예요? 네 회당 20만원 그대로요. 알겠어요.
+
+두 번째, 치료비 지원이요. 센터장님 이거 지금 집행률이 4월 말 기준 38프로예요. 작년 이맘때 45였는데. 좀 낮네요. 신청이 줄었나요? 신청은 비슷한데 심사에서 반려가 좀 있었어요. 소득 기준 서류가 안 맞아서요. 그거 안내문에 서류 목록을 좀 더 자세히 넣어야 될 것 같아요. 네 그건 담당 선생님이 안내문 고쳐서 다음 주 회의 때 가져오세요. 네 다음 주 화요일이요. 예산 추가 배정은 아직 얘기할 단계는 아닌 것 같고, 6월 말 집행률 보고 다시 얘기하죠. 네.
+
+아 그리고 저번에 얘기한 홈페이지 신청 서식 파일이 아직 hwp라서요, 사람들이 스마트폰에서 못 연다고. 그거는... 일단 pdf로도 같이 올려놓죠. 누가 올려요? 그건 저희 팀에서요. 네.
+
+세 번째 캠페인. 다음 달 9월 10일 자살예방의 날이잖아요. 작년처럼 원주역 광장에서 할지, 아니면 올해는 중앙시장으로 갈지. 시장 쪽이 유동인구는 많은데 상인회 협조가 필요해요. 그거는 좀 알아봐야 될 것 같은데. 상인회 연락처는 있어요? 작년 담당자가 갖고 있을 텐데 지금 없어서... 음. 이건 오늘 결정 못 하겠네요. 장소는 다음 주까지 두 군데 다 알아보고 다시 얘기하죠. 현수막이랑 리플릿은 장소 정해지고 나서 하는 걸로. 네.
+
+아 그리고 인턴 선생님 다음 주부터 오시는 거 맞죠? 네 월요일이요. 자리는 창가 쪽으로. 알겠습니다.
+
+더 있어요? 없으면 마치죠. 다음 회의는 다음 주 화요일 같은 시간. 수고하셨습니다. 아 점심 뭐 먹어요.</div>
+    <div class="files">
+      <button type="button" class="copy" data-target="p-material">프롬프트 복사</button>
+      <button type="button" class="dl" id="btn-md">md 다운로드</button>
+    </div>
+    <p class="meta">이렇게 나오면 정답 — 결정 4건(교육일 5/21 14시 · 면사무소 공문 재발송+전화 · 치료비 안내문 서류 보완 · 신청 서식 PDF 병행 게시), 미결 2건(캠페인 장소 · 치료비 예산 추가 배정 6월 말 재검토). 담당 칸에 "(추정)"이 붙어 있으면 정상입니다.</p>
+    <div class="check" data-key="p2"><label><input type="checkbox">스킬 생성 완료</label><label><input type="checkbox">회의록 hwpx 받기</label></div>
+  </div>
+
+  <div class="card" data-lesson="p3">
+    <h2>③ 계획안 스킬 center-plan 만들기 (2교시 · 그대로 붙여넣기)</h2>
+    <div class="goal">어제 규칙 블록으로 쓰던 계획안을 스킬로 옮긴 두 번째 예시. 이번엔 설명 없이 바로 복사해서 넣어 봅니다.</div>
+    <p class="meta"><b>P-1 — 스킬 설명</b> (스킬 이름: <code>center-plan</code>)</p>
+    <div class="prompt" id="p-p1">원주시정신건강복지센터 내부 계획안(내부결재 공문 + 붙임1 계획안)을 작성할 때 사용. 마스터 시트의 사업 정보를 입력받아 센터 계획안 양식 순서와 문서 규칙에 맞는 텍스트를 만들고, 요청하면 첨부 양식(hwpx)에 채워 저장한다.</div>
+    <div class="files"><button type="button" class="copy" data-target="p-p1">프롬프트 복사</button></div>
+
+    <p class="meta" style="margin-top:12px"><b>P-2 — 지침</b></p>
+    <div class="prompt" id="p-p2">너는 원주시정신건강복지센터 사업 담당자다. 센터 내부 계획안 양식을 채운다.
+
+[입력]
+마스터 시트 내용: 사업명, 일시, 대상, 필요성 근거(통계·전년도 결과·개선과제), 목적, 사업 내용, 예산 항목(항목·산출기초·금액), 일정, 역할분담, 평가 방법.
+빠진 항목은 "[확인 필요]"로 표시하고 지어내지 않는다.
+
+[문서 구성 — 이 순서를 바꾸지 않는다]
+A. 내부결재 공문 (앞장)
+  수신자: 내부결재 / 제목: ○○○○년 ○○○ 계획
+  본문: 계획 배경 한 문단으로 시작해 "~계획하였기에 보고합니다."로 맺는다.
+  이어서 1. 일시 2. 대상 3. 내용 세 줄, 그 아래 "붙임 1. ○○○ 1부.  끝."
+B. [붙임1] 계획안
+  제목(15pt) → 1. 필요성 → 2. 목적 → 3. 사업 내용 → 4. 예산 → 5. 진행 및 역할분담 (가. 진행 절차 표, 나. 역할분담 표) → 6. 평가 → 7. 기대효과
+  1. 필요성에는 시트의 근거(통계·전년도 결과·개선과제) 중 최소 1개를 문장에 넣는다.
+
+[문서 규칙]
+- 맑은 고딕, 제목 15pt, 본문 11pt, 줄간격 160%, 검정
+- 번호: 1. → 가. → 1) → 가) → (1). 수준마다 2칸씩 들여쓰기
+- 개조식 "~함/~임". 공문 본문만 "~합니다" 경어체
+- 사람 이름 대신 직위(센터장, 부센터장, 팀장, 담당). 역할분담 표도 직위로 쓴다
+- 예산표는 구분·산출기초·금액 3열. 산출기초는 "단가 × 수량 × 횟수" 형태로 시트 값을 그대로 쓴다. 총계는 계산하지 않고 비워 둔다
+- 진행 절차 표는 세로 항목(단계) × 가로 날짜. 날짜는 시트 일정만 사용
+
+[출력]
+- 기본: 한글에 붙여넣을 텍스트. 설명·인사말·마크다운 기호 없이 문서 본문만. 표는 탭 구분
+- "hwpx로"라고 하면: 첨부된 계획안 양식.hwpx의 칸을 채워 hwpx 파일로 저장한다. 양식 구조·결재선·표 틀은 바꾸지 않는다
+
+[금지]
+시트에 없는 수치·근거·일정을 만들지 않는다. 합계를 계산하지 않는다. 양식의 예시 문장(자살예방 치료비 지원 등)을 결과에 남기지 않는다.</div>
+    <div class="files"><button type="button" class="copy" data-target="p-p2">프롬프트 복사</button></div>
+    <p class="meta">설정 → 사용자 지정 → 스킬 → 추가 → 스킬 만들기 → 이름 <code>center-plan</code> → 설명 P-1, 지침 P-2 붙여넣기 → 만들기.</p>
+    <div class="check" data-key="p3"><label><input type="checkbox">스킬 생성 완료</label></div>
+  </div>
+
+  <div class="card" data-lesson="p4">
+    <h2>④ 내 스킬은 말로 만들기 + 스킬 디렉터리 (2교시)</h2>
+    <div class="goal">규칙이 문서로 없을 때는 말로 풀면 Claude가 이름·설명·지침을 정리해 준다. 이미 있는 스킬 목록도 확인한다.</div>
+    <p class="meta"><b>center-check 만들기</b> — 추가 → 'Claude와 함께 창작하기'에 그대로 입력</p>
+    <div class="prompt" id="p-check">계획안 텍스트를 붙여넣으면 번호 체계 · 실명 · KPI 6기준 · 예산 합계를 검사해서 위반 목록만 표로 내는 스킬을 만들어 줘. 이름은 center-check.</div>
+    <div class="files"><button type="button" class="copy" data-target="p-check">프롬프트 복사</button></div>
+
+    <p class="meta" style="margin-top:12px"><b>바로 쓰는 것 (Anthropic 기본 제공)</b></p>
+    <ul>
+      <li><code>/skill-creator</code> — 스킬을 만들고 고쳐 준다 · "회의록 스킬 만들어 줘"</li>
+      <li><code>/doc-coauthoring</code> — 긴 문서(제안서·보고서)를 같이 쓴다 · "교육 제안서 같이 쓰자"</li>
+      <li><code>/theme-factory</code> — 슬라이드·문서·HTML에 색·글꼴 테마 · "이 PPT를 그린 테마로"</li>
+      <li><code>/canvas-design</code> — 포스터·카드뉴스·표지를 PNG·PDF로 · "교육 포스터 A4 한 장"</li>
+      <li><code>/learn</code> — 개념 설명·퀴즈·플래시카드 · "MCP를 초보자한테 설명하듯"</li>
+      <li><code>/web-artifacts-builder</code> — 여러 화면·상태가 있는 웹앱 · "설문 입력 → 집계 → 결과 앱"</li>
+      <li><code>/internal-comms</code> — 내부 공지·주간 보고·FAQ · "임원진 주간 업데이트 초안"</li>
+    </ul>
+    <p class="meta">가져다 쓰는 4개(공문·발표·대시보드·CSV)는 아래 <b>⑧ 자료실</b>에서 내려받습니다.</p>
+    <div class="check" data-key="p4"><label><input type="checkbox">말로 스킬 만들기 1회</label></div>
+  </div>
+
+  <div class="card" data-lesson="p5">
+    <h2>⑤ 코워크 실습 — 폴더째 맡기기 (3~4교시)</h2>
+    <div class="goal">설문 데이터 하나로 Chat(패턴 분석) → Cowork(파일 정리) → Code(대시보드) → Design(보고자료)까지 이어지는 실습. 아래는 코워크 프롬프트 6개입니다.</div>
+
+    <p class="meta"><b>파일 정리 · 분류</b> (데스크톱 앱에서만 가능)</p>
+    <div class="prompt" id="p-c1">중복 파일을 정리해줘</div>
+    <div class="files"><button type="button" class="copy" data-target="p-c1">프롬프트 복사</button></div>
+
+    <p class="meta" style="margin-top:12px"><b>계획을 세워 순차 처리</b></p>
+    <div class="prompt" id="p-c2">2026 시행계획서 초안을 hwpx로. 2024 실적 근거로, 평가지침 기준 빠진 항목 점검</div>
+    <div class="files"><button type="button" class="copy" data-target="p-c2">프롬프트 복사</button></div>
+
+    <p class="meta" style="margin-top:12px"><b>폴더째 전달 — 파일 31개 한 번에</b></p>
+    <div class="prompt" id="p-c3">운영매뉴얼 폴더의 파일을 전부 읽고 관리대장 엑셀로 만들어줘</div>
+    <div class="files"><button type="button" class="copy" data-target="p-c3">프롬프트 복사</button></div>
+
+    <p class="meta" style="margin-top:12px"><b>브라우저 직접 조작</b> (Claude in Chrome 확장 필요)</p>
+    <div class="prompt" id="p-c4">재단 홈페이지 공지사항을 열어서 최근 한 달 공지 중 센터 업무 관련된 것만 정리해줘</div>
+    <div class="files"><button type="button" class="copy" data-target="p-c4">프롬프트 복사</button></div>
+
+    <p class="meta" style="margin-top:12px"><b>클라우드 예약 작업 3가지</b></p>
+    <div class="prompt" id="p-c5">[매월 1일 오전 9시]
+지난달 사례관리 실적 엑셀을 읽어서 월간 실적 집계표를 만들어줘.
+
+[매주 금요일 오후 4시]
+이번 주 회의록 폴더를 확인해서 정리 안 된 녹취 파일이 있으면 알려줘.
+
+[매일 아침 8시]
+보건복지부와 한국생명존중희망재단의 새 공지를 확인해서 센터 업무 관련된 것만 정리해줘.</div>
+    <div class="files"><button type="button" class="copy" data-target="p-c5">프롬프트 복사</button></div>
+
+    <p class="meta" style="margin-top:12px"><b>스킬 + 커넥터를 함께 예약</b> (2교시 center-minutes 재사용)</p>
+    <div class="prompt" id="p-c6">매주 금요일 오후 5시에, 구글 드라이브의 회의록 폴더를 확인해서 정리 안 된 녹취가 있으면 /center-minutes 회의록을 만들고 초안을 메일 임시보관함에 넣어줘.</div>
+    <div class="files"><button type="button" class="copy" data-target="p-c6">프롬프트 복사</button></div>
+    <p class="meta">큰 행동 전에는 항상 승인 창이 먼저 뜹니다 — 확인 없이 실행되지 않습니다.</p>
+    <div class="check" data-key="p5"><label><input type="checkbox">코워크 프롬프트 1개 이상 실행</label></div>
+  </div>
+
+  <div class="card" data-lesson="p6">
+    <h2>⑥ Claude Design — 성과 시각화 (5교시)</h2>
+    <div class="goal">말로 시키면 초안이 나오고, 나온 결과를 클릭해서 직접 수정한다.</div>
+    <ul>
+      <li><b>캔바</b>는 템플릿을 골라 내가 채우고, <b>Design</b>은 말로 시키면 초안이 나온다</li>
+      <li>나온 결과는 클릭해서 글자·색·위치를 직접 수정할 수 있다</li>
+      <li>디자인 시스템을 등록해 두면 색·서체가 모든 시안에 자동 적용된다</li>
+      <li>내보내기는 이미지·PDF뿐 아니라 PPTX·코드까지 — 캔바로 마무리해도 된다</li>
+    </ul>
+    <p class="meta">템플릿 12종 중 기관 업무에 바로 쓰는 것 — 슬라이드(사업설명회·센터장 보고), 문서(사업계획서·결과보고서), 와이어프레임·UI 목업(7교시 대시보드 설계), 리서치(만족도 조사), 색상+서체(홍보물 톤 통일).</p>
+    <div class="check" data-key="p6"><label><input type="checkbox">템플릿 1개 실습</label></div>
+  </div>
+
+  <div class="card" data-lesson="p7">
+    <h2>⑦ 코드 탭 — 자동화 앱 배포 (6~7교시)</h2>
+    <div class="goal">터미널은 개발자용, 코드 탭은 일반인용. 저장소를 고르고 프롬프트 한 줄이면 시작이다.</div>
+    <ol>
+      <li>첫 화면 파일은 반드시 <code>index.html</code>로 저장 (한글 파일명은 웹 주소에서 깨짐)</li>
+      <li>github.com 가입 → 우측 상단 + → New repository → 이름 입력 → <b>Public</b> 선택 → Create</li>
+      <li>저장소 페이지에서 Add file → Upload files → index.html 끌어다 놓기 → Commit changes</li>
+      <li>Settings → Pages → Branch: main / (root) → Save (최초 배포 1~2분)</li>
+    </ol>
+    <p class="meta">주소는 <code>https://내아이디.github.io/저장소이름/</code> 형태. 업데이트할 땐 index.html만 다시 올리면 1~2분 후 자동 재배포됩니다.</p>
+    <div class="check" data-key="p7"><label><input type="checkbox">GitHub Pages 배포 완료</label></div>
+  </div>
+
+  <div class="card" data-lesson="p8">
+    <h2>⑧ 자료실 — 스킬 내려받기</h2>
+    <div class="goal">묶음 zip을 올리지 말고, 아래를 하나씩 Claude 설정 → 사용자 지정 → 스킬 → 추가 → 스킬 업로드에 넣으세요.</div>
+    <div class="files">
+      <button type="button" class="dl" data-skill="0">gongmunseo.zip ⤓</button>
+      <button type="button" class="dl" data-skill="1">web-content-designer.zip ⤓</button>
+      <button type="button" class="dl" data-skill="2">powerpoint-keynote-presentation.zip ⤓</button>
+      <button type="button" class="dl" data-skill="3">csv-data-summarizer.zip ⤓</button>
+      <button type="button" class="dl" data-skill="4">lecture-ppt.zip ⤓</button>
+      <span>hwpx.zip — 강사 업로드 예정</span>
+      <span>센터_전체자료.zip — 강사 업로드 예정</span>
+    </div>
+    <p class="meta" style="margin-top:10px">gongmunseo — 공문·기안·계획서·회의록 · web-content-designer — 대시보드·인포그래픽 · powerpoint-keynote-presentation — 발표 흐름 개요 · csv-data-summarizer — CSV 집계·그래프 · lecture-ppt — 강의·교육 PPT 설계</p>
+    <div class="check" data-key="p8"><label><input type="checkbox">스킬 5종 중 1개 이상 설치</label></div>
+  </div>
+
+</main>
+<footer>체크 표시는 이 브라우저에만 저장됩니다. 강사 정경 · 한국폴리텍대학 원주캠퍼스 · 원주시정신건강복지센터 · © 2026 <a href="https://www.kailea.kr/" target="_blank" rel="noopener" style="color:var(--accent)">한국AI평생교육협회</a></footer>
+<script>
+(function(){
+  function ls(fn){try{return fn()}catch(e){return null}}
+
+  /* 카드 접기 */
+  document.querySelectorAll('.card[data-lesson]').forEach(function(c){
+    var h=c.querySelector('h2'); if(!h) return;
+    var k='hub2.open.'+c.dataset.lesson;
+    h.setAttribute('role','button'); h.setAttribute('tabindex','0');
+    function set(open,save){
+      c.classList.toggle('open',open);
+      h.setAttribute('aria-expanded',open?'true':'false');
+      if(save) ls(function(){localStorage.setItem(k,open?'1':'0')});
+    }
+    set(ls(function(){return localStorage.getItem(k)})==='1',false);
+    function toggle(){set(!c.classList.contains('open'),true)}
+    h.addEventListener('click',toggle);
+    h.addEventListener('keydown',function(e){
+      if(e.key==='Enter'||e.key===' '||e.key==='Spacebar'){e.preventDefault();toggle()}
+    });
+  });
+
+  /* 체크 저장 + 진행률 */
+  var boxes=[].slice.call(document.querySelectorAll('.check input'));
+  function key(i){
+    var g=i.closest('.check').dataset.key;
+    var idx=Array.prototype.indexOf.call(i.closest('.check').querySelectorAll('input'),i);
+    return 'hub2.'+g+'.'+idx;
+  }
+  function paint(){
+    var done=0;
+    boxes.forEach(function(i){if(i.checked)done++});
+    document.getElementById('prog').textContent=done+' / '+boxes.length+' 완료';
+    document.querySelectorAll('.card[data-lesson]').forEach(function(c){
+      var ins=c.querySelectorAll('.check input');
+      var all=ins.length&&Array.prototype.every.call(ins,function(i){return i.checked});
+      c.classList.toggle('done',!!all);
+    });
+  }
+  boxes.forEach(function(i){
+    i.checked=ls(function(){return localStorage.getItem(key(i))})==='1';
+    i.addEventListener('change',function(){
+      ls(function(){localStorage.setItem(key(i),i.checked?'1':'0')});
+      paint();
+    });
+  });
+
+  /* 프롬프트 복사 */
+  document.querySelectorAll('button.copy').forEach(function(b){
+    b.addEventListener('click',function(){
+      if(b.classList.contains('copied')) return;
+      var src=document.getElementById(b.dataset.target); if(!src) return;
+      var text=src.textContent, label=b.textContent;
+      function ok(){
+        b.textContent='복사됨'; b.classList.add('copied');
+        setTimeout(function(){b.textContent=label;b.classList.remove('copied')},1200);
+      }
+      function fallback(){
+        var ta=document.createElement('textarea');
+        ta.value=text; ta.setAttribute('readonly','');
+        ta.style.position='fixed'; ta.style.left='-9999px';
+        document.body.appendChild(ta); ta.select();
+        try{document.execCommand('copy');ok()}catch(e){}
+        document.body.removeChild(ta);
+      }
+      if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok,fallback);
+      else fallback();
+    });
+  });
+
+  paint();
+})();
+
+/* ---- Claude 다운로드 기능 (스킬 zip · 녹취 md) ---- */
+var SKILLS = [
+  {name:'gongmunseo.zip', b64:'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'},
+  {name:'web-content-designer.zip', b64:'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'},
+  {name:'powerpoint-keynote-presentation.zip', b64:'UEsDBBQAAAAIAO6QKl0j6VRBcQQAABAIAAAoAAAAcG93ZXJwb2ludC1rZXlub3RlLXByZXNlbnRhdGlvbi9TS0lMTC5tZHVVzXLaVhTe6ynuTBZsItz0b5FF153pz2SRB4hLVJeJDQyQSbMDLFwF5CmukRFYovIEG+OhUwVkI8/QjR/FS91z36Hn3CtjnKYLZrjn3vPzfec7R7qua4XNHeMpKxXfGOVSMV+o6q+Mt4Vi1dBLZaNiFKqb1XyxoL00KrlyvkT/n7JvdI0xCDxwLB564sB7zKAxhV7z7pTM/gG3DmOT8XmUzAO8N2Pwl3BmMdFdwrX7mInGiDdj0Yrp8kMyXypnmLn8zyWD2V8wOgDfZcLu8PY5+BFv4OHoHf+9D77JyFC34SgCZ8mE4/JWl6UR0OnZs+c3i+8UEAatkdgL+NmUYwV+jKnQpA4RP/T4HMucdKHtwbjGT/HSHCVzUzgB444tkQ0mwvF4e5RlyWUHvBM0sCR0MBMMO/y9jSjxlhz5oX+zUKBvFooixi8mENSprLTAXofBIAQzYGRfBdd0bIf2KH2vaRlwLah7D4rNpKkyKhfvrAFnwu/wMzND9PDzJQQ1xsc2PwxkcAwMRzGW9ACRpunstuY9+YxfmQ9aShQi2imchJKT4Qk4Jozc25qvXJI4TKIaDE/THmNI8Jb8xFvjGx0xBzLLYOytOyu5EMuD/bT6lHkCFZxiPiuZ2ar+EXV53XlNLilmCflTb4U1xRZtkBp7zY2V5u4Y+x+A/+XKRW0wcFrIdsqa6v/NQikCm31si/oUrH1s1KrlEZ9EbNvIVV+XcaBK1bTv6E6atjz27fMfvmdIUBLWRb9Lr98YP+m5YqGKo6fj1OW3Ckb53i2ZX/JpnE6D4g9MLPO4g2YEcYDkpGm3ioWtndeFilG8cydtKV0I2wanSRJPZruERs0b1aWIkSWZ92dxbFKSdNDUGG4ksxACZ+VNwCn331iIY0pdNiJkT5IllYKcoexYslgmH0LyQ4Hv1jGHy08COZeeKXqupmFYUlWInF9NUJqUFyHxK0tgkwZdigJjS2Lu7UnGwy5pb62hUsx3o4XQUbB8Ht+rE7PsIukTdrv3ByNSsd30F/oUu5bEFi0LLIGMwrmE9hThxaQIPyINKXtELOCU00kBU1HaI2QpVbi8w/R2TQzOCad8Megib0QigpeSW5tzIhuu+5r2JMsk2OEprg3JPRGIdJIe3y/RntU+zxJa0pxfozveOk0JU8GF60iA9PaLLOP7ISEwQwqXSRYxH7okIj6NoPebAp1Jrm1KgfjA9LPal9m1lYw/JUIGuz7hwjgoZoyBCKkLvH0pJzIMcdVnta8w59ii7Tp+l6LgF03Rl2KgJdqYKikx7qpbXBq+vb7tsZltL6t9jWyoMRHNfepkK04XYrpahx1ZIO6Ri+baboBGxM/Cj5Vw5dGqQXagjTP/gP4fSbQr8hS7aEplsPpckEnVs5I6XGFb0wGqq8/DaozwyNQCkhtAgnzwKaLt2QspcbrYm0up1EdyVDBlHxs8q4HlYoAXZeNno2wUckZlw/h1c6e0bVSyOy9ffHSV+8XIvdrOV6qfuKtUi+W3+mY5pxz/BVBLAwQUAAAACADukCpdaFHsewgBAACVAQAANwAAAHBvd2VycG9pbnQta2V5bm90ZS1wcmVzZW50YXRpb24vcmVmZXJlbmNlcy9jaGVja2xpc3QubWRlkOFKw0AQhP/7FAv+FtEX8M0klgvGRMFij6T1ElK1xtYrHDUVhTxRdu4d3EsrVPw7zMy3s8eErcFTTP0mQlIcnRA748eG/KMibNZ4GaNsiW2L/BqlEp9Drb1uoTvyuuB0giYiXsV+KrLpXXQhLdi809nlOaoF8nso6dNbZFaKvlAHE/FHK80S/02klssuSA+GxMOr5UBeTpAZQfCiE1lxZnfUfYzvnNi8cphGhOdOiISRFU3AxHHHrxb1FSF34XRpRJUcxD8TrxVmEzmdeNRitqMOTxBw71RYjWoOrfjtO2yFTg8KXMHz+hRG+bwYkLfR0JVt/8OaJAxpbkiA4bkj2bIeeH/e9wNQSwMEFAAAAAgA7pAqXRB2I5VFAQAA5wEAADYAAABwb3dlcnBvaW50LWtleW5vdGUtcHJlc2VudGF0aW9uL3JlZmVyZW5jZXMvZXhhbXBsZXMubWRdkMFOwkAURfd8xUvYV5GFbnVn3LDwF8rWhPgBRUpCLIkQqQw407RaJJiaFCgmJvgzLDu3/+BMWwhxNy/vvnvP3CrhIcJ0QWA9OJzqacwrlWp1P9cMqp3Kb5vgc7g9GfNsyCs7i0Mk+em4W2xgcznbluJCpmzBtzLgBC9KNxHsZeYmCJlB2HC8dUl+LuC3ISyCE2k3buN1kFtPY/kRlakQKt/2s47IXCafbBkI0q/HEaWrjpJLJzR2ljgGPzPU7hesjbniWSfp2j9gO6FO9Qbyva+ZZd/StCJRBHSe8+d6XUujcas/oOmDOJuM9h9IV7EM/HS9JQim7tQM31XYI6y+cl7Xw3igmojxw8qrf4h11YO9VB5HrbJIaffFFktFeGU271rmyWXz3mxhYtFN45oQDnVpRcEX8GZl63qU8758DvFySP0DUEsDBBQAAAAIAO6QKl26lZczHgEAALABAAA4AAAAcG93ZXJwb2ludC1rZXlub3RlLXByZXNlbnRhdGlvbi9yZWZlcmVuY2VzL3N0b3J5LWFyY3MubWRdUFFKw0AQ/c8pFnKAnEH/xB8vkf4KxQOkdVvSJmAVU5OawBZCEyVCmo2SQr2Mn7szd+hmNxXxa9/M7Lw379lEhh4+pgSWOc6Z3FUEwxJpa1m2TYClEPkOxBN4mVmy6lSD/MyfiOhq3IQaYtSKptYQ6lJyCmxlql0m9sMgyHG9MFBTanbRfPfMBSWSt4IzS/HILRtYPyGoCPgxHGKz+LqCrDOQMrzPoPDMLV+hWlakulIOeiuTysyaGlhEYPMMzYexRPeCHwdB+f7We/934qU7uh27zsXozh3rxvXNlfkzreR2EK1TdYViOicigxyyUD2l4FQr4TSXsw6XnQWFr7Jz/ubXen1MwCgmg72sheiocv01e0hMEuuFfEjOuZ0AUEsBAhQDFAAAAAgA7pAqXSPpVEFxBAAAEAgAACgAAAAAAAAAAAAAAKSBAAAAAHBvd2VycG9pbnQta2V5bm90ZS1wcmVzZW50YXRpb24vU0tJTEwubWRQSwECFAMUAAAACADukCpdaFHsewgBAACVAQAANwAAAAAAAAAAAAAApIG3BAAAcG93ZXJwb2ludC1rZXlub3RlLXByZXNlbnRhdGlvbi9yZWZlcmVuY2VzL2NoZWNrbGlzdC5tZFBLAQIUAxQAAAAIAO6QKl0QdiOVRQEAAOcBAAA2AAAAAAAAAAAAAACkgRQGAABwb3dlcnBvaW50LWtleW5vdGUtcHJlc2VudGF0aW9uL3JlZmVyZW5jZXMvZXhhbXBsZXMubWRQSwECFAMUAAAACADukCpdupWXMx4BAACwAQAAOAAAAAAAAAAAAAAApIGtBwAAcG93ZXJwb2ludC1rZXlub3RlLXByZXNlbnRhdGlvbi9yZWZlcmVuY2VzL3N0b3J5LWFyY3MubWRQSwUGAAAAAAQABACFAQAAIQkAAAAA'},
+  {name:'csv-data-summarizer.zip', b64:'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'},
+  {name:'lecture-ppt.zip', b64:'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'}
+];
+
+function b64ToBlob(b64){
+  var bin = atob(b64);
+  var bytes = new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++){ bytes[i] = bin.charCodeAt(i); }
+  return new Blob([bytes], {type:'application/zip'});
+}
+
+var downloadsCap = null;
+(async function(){
+  try{
+    if(window.claude && window.claude.use){ downloadsCap = await window.claude.use('downloads'); }
+  }catch(e){}
+})();
+
+async function ensureCap(){
+  if(!downloadsCap){ downloadsCap = window.claude && window.claude.use ? await window.claude.use('downloads') : null; }
+  return downloadsCap;
+}
+
+document.querySelectorAll('button.dl[data-skill]').forEach(function(btn){
+  btn.addEventListener('click', async function(){
+    var s = SKILLS[+btn.dataset.skill];
+    var original = btn.textContent;
+    btn.textContent = '준비 중…';
+    try{
+      var cap = await ensureCap();
+      if(!cap){ btn.textContent = '이 화면에서는 지원 안 됨'; setTimeout(function(){btn.textContent=original;},2200); return; }
+      await cap.save({filename: s.name, data: b64ToBlob(s.b64)});
+      btn.textContent = '저장됨 ✓'; btn.classList.add('done');
+      setTimeout(function(){ btn.textContent = original; btn.classList.remove('done'); }, 1800);
+    }catch(err){
+      if(err && err.code === 'declined'){ btn.textContent = original; return; }
+      btn.textContent = '다시 시도';
+      setTimeout(function(){ btn.textContent = original; }, 1800);
+    }
+  });
+});
+
+var mdBtn = document.getElementById('btn-md');
+if(mdBtn){
+  mdBtn.addEventListener('click', async function(){
+    var original = mdBtn.textContent;
+    mdBtn.textContent = '준비 중…';
+    try{
+      var cap = await ensureCap();
+      if(!cap){ mdBtn.textContent = '이 화면에서는 지원 안 됨'; setTimeout(function(){mdBtn.textContent=original;},2200); return; }
+      var text = document.getElementById('p-material').textContent;
+      var md = '# 2교시 연습용 녹취 — 센터 회의록\n\n> center-minutes 실습 재료. 클로바노트 텍스트를 붙여넣는 대신 이 파일을 그대로 첨부해도 됩니다.\n\n' + text;
+      await cap.save({filename: '2교시_녹취_원본.md', data: md});
+      mdBtn.textContent = '저장됨 ✓'; mdBtn.classList.add('done');
+      setTimeout(function(){ mdBtn.textContent = original; mdBtn.classList.remove('done'); }, 1800);
+    }catch(err){
+      if(err && err.code === 'declined'){ mdBtn.textContent = original; return; }
+      mdBtn.textContent = '다시 시도';
+      setTimeout(function(){ mdBtn.textContent = original; }, 1800);
+    }
+  });
+}
+</script>
