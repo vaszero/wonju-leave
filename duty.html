@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>당번 배정 도우미</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    color-scheme: light;
+    --ground:#F6F3EC;
+    --surface:#FFFFFF;
+    --surface-2:#EFEAE0;
+    --ink:#23282A;
+    --ink-dim:#63685F;
+    --ink-faint:#8B8F84;
+    --line:#DDD5C4;
+    --line-strong:#C7BCA4;
+    --teal:#2F6E6B;
+    --teal-strong:#1F4F4D;
+    --teal-tint:#DCEAE8;
+    --teal-tint-strong:#C6DEDB;
+    --amber:#B0691F;
+    --amber-strong:#8A5015;
+    --amber-tint:#F3E3CC;
+    --plum:#6E4FA0;
+    --plum-strong:#553C80;
+    --plum-tint:#E5DEF2;
+    --danger:#B0392F;
+    --shadow: 0 1px 2px rgba(35,40,42,.06), 0 6px 18px -10px rgba(35,40,42,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      color-scheme: dark;
+      --ground:#181C1B; --surface:#212624; --surface-2:#262B28;
+      --ink:#EDEAE1; --ink-dim:#AAB0A7; --ink-faint:#767C74;
+      --line:#3A413E; --line-strong:#48524C;
+      --teal:#7BC4BE; --teal-strong:#9BD8D2; --teal-tint:#25302E; --teal-tint-strong:#2C3A38;
+      --amber:#E2A465; --amber-strong:#EFC08E; --amber-tint:#332715;
+      --plum:#B7A0E0; --plum-strong:#D3C4EE; --plum-tint:#2C2740;
+      --danger:#E08579;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:'Noto Sans KR','Malgun Gothic',system-ui,sans-serif;line-height:1.6;font-size:15px;}
+  h1,h2,h3{font-family:'Noto Serif KR','Nanum Myeongjo',serif;font-weight:700;color:var(--ink);text-wrap:balance;margin:0;}
+  .mono{font-family:'IBM Plex Mono','D2Coding',monospace;font-variant-numeric:tabular-nums;}
+  button,select,input{font-family:inherit;}
+  button{cursor:pointer;}
+  :focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:4px;}
+
+  .wrap{max-width:880px;margin:0 auto;padding:28px 20px 60px;}
+  header.hero{padding-bottom:18px;border-bottom:1px solid var(--line);margin-bottom:24px;}
+  header.hero .eyebrow{font-size:12px;letter-spacing:.09em;color:var(--teal-strong);font-weight:700;text-transform:uppercase;}
+  header.hero h1{font-size:27px;margin-top:6px;}
+  header.hero p{color:var(--ink-dim);max-width:64ch;margin-top:8px;font-size:14px;}
+
+  section{margin-bottom:34px;}
+  .section-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+  .section-head h2{font-size:18px;}
+  .section-sub{color:var(--ink-dim);font-size:13px;margin:-4px 0 14px;max-width:66ch;}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;box-shadow:var(--shadow);}
+  .card + .card{margin-top:12px;}
+
+  .field-row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px;}
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field label{font-size:11.5px;font-weight:600;color:var(--ink-faint);letter-spacing:.02em;}
+  .field input[type=month],.field select{
+    border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);
+    border-radius:7px;padding:7px 10px;font-size:13.5px;
+  }
+
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-strong);
+    background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 14px;
+    font-size:13px;font-weight:600;
+  }
+  .btn:hover{border-color:var(--teal);}
+  .btn.primary{background:var(--teal);border-color:var(--teal-strong);color:#fff;}
+  .btn.primary:hover{background:var(--teal-strong);}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--ink-dim);padding:6px 8px;font-weight:500;}
+  .btn.ghost:hover{color:var(--danger);}
+  .btn.small{padding:5px 10px;font-size:12px;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+
+  .exclude-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+  .chip-toggle{
+    display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);
+    border-radius:999px;padding:4px 10px 4px 8px;font-size:12px;background:var(--surface-2);
+    color:var(--ink-dim);cursor:pointer;user-select:none;
+  }
+  .chip-toggle input{margin:0;}
+  .chip-toggle.on{background:var(--amber-tint);border-color:var(--amber);color:var(--amber-strong);font-weight:600;}
+
+  .pick-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .pick-card{
+    background:var(--surface-2);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;display:flex;flex-direction:column;gap:8px;
+  }
+  .pick-card .off{
+    align-self:flex-start;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;
+  }
+  .off-1{background:var(--teal-tint);color:var(--teal-strong);}
+  .off-2{background:var(--amber-tint);color:var(--amber-strong);}
+  .off-3{background:var(--plum-tint);color:var(--plum-strong);}
+  .pick-card .name{font-family:'Noto Serif KR',serif;font-size:20px;font-weight:700;}
+  .pick-card .why{font-size:12px;color:var(--ink-faint);}
+  .pick-card select{width:100%;margin-top:4px;border:1px solid var(--line-strong);border-radius:7px;padding:6px 8px;font-size:12.5px;background:var(--surface);color:var(--ink);}
+  .pick-actions{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;}
+  .empty-note{font-size:13px;color:var(--ink-faint);padding:10px 0;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{text-align:left;font-size:11px;letter-spacing:.03em;color:var(--ink-faint);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line-strong);}
+  tbody td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  .tablewrap{overflow-x:auto;}
+  .num-cell{font-family:'IBM Plex Mono',monospace;text-align:right;}
+  .meter{position:relative;height:6px;border-radius:4px;background:var(--surface-2);width:90px;overflow:hidden;}
+  .meter i{position:absolute;left:0;top:0;bottom:0;background:var(--teal);border-radius:4px;}
+  .tag-off{font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;}
+  .status-toggle{font-size:11.5px;padding:3px 8px;border-radius:6px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink-dim);}
+  .status-toggle.active{background:var(--teal-tint);border-color:var(--teal);color:var(--teal-strong);}
+  .status-toggle.inactive{background:var(--surface-2);color:var(--ink-faint);}
+  .name-input{border:1px solid var(--line-strong);border-radius:6px;padding:4px 6px;font-size:13px;width:84px;background:var(--surface);color:var(--ink);}
+
+  .add-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center;}
+  .add-row select,.add-row input{border:1px solid var(--line-strong);border-radius:7px;padding:6px 10px;font-size:13px;background:var(--surface);color:var(--ink);}
+
+  details{border:1px solid var(--line);border-radius:10px;background:var(--surface);}
+  details summary{cursor:pointer;padding:12px 16px;font-weight:600;font-size:13.5px;list-style:none;display:flex;align-items:center;gap:8px;}
+  details summary::-webkit-details-marker{display:none;}
+  details summary::before{content:'▸';color:var(--ink-faint);font-size:11px;transition:transform .15s ease;}
+  details[open] summary::before{transform:rotate(90deg);}
+  details .inner{padding:0 16px 16px;}
+
+  .backup-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .backup-row input[type=file]{font-size:12.5px;}
+  .msg{font-size:12.5px;color:var(--teal-strong);margin-top:8px;min-height:1.2em;}
+  .msg.err{color:var(--danger);}
+
+  footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);font-size:11.5px;color:var(--ink-faint);}
+
+  @media (max-width:640px){
+    .pick-row{grid-template-columns:1fr;}
+    .field-row{flex-direction:column;align-items:stretch;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="hero">
+    <span class="eyebrow">사무실 순환 배정</span>
+    <h1>당번 배정 도우미</h1>
+    <p>매달 3개 사무실(①②③) 중 서로 다른 두 곳에서 한 명씩, 당번 횟수와 마지막 당번 시점을 기준으로 공정하게 골라 드립니다. 2018~2026년 배정 이력을 반영해 놓았고, 2027년부터 이 화면에서 이어서 배정하면 됩니다.</p>
+  </header>
+
+  <section id="pick">
+    <div class="section-head"><h2>이번 배정 만들기</h2></div>
+    <p class="section-sub">대상 연월을 고르고 이번 달에 제외할 인원(휴가·부재 등)을 체크한 뒤 뽑기를 누르세요. 가장 적게, 가장 오래전에 당번을 했던 두 사람을 서로 다른 사무실에서 골라줍니다.</p>
+
+    <div class="card">
+      <div class="field-row">
+        <div class="field">
+          <label for="target-ym">대상 연월</label>
+          <input type="month" id="target-ym">
+        </div>
+        <button class="btn primary" id="btn-draw">당번 뽑기</button>
+        <button class="btn" id="btn-redraw" disabled>다른 후보로 다시 뽑기</button>
+      </div>
+
+      <div class="field">
+        <label>이번 달 제외 인원</label>
+        <div class="exclude-list" id="exclude-list"></div>
+      </div>
+
+      <div id="pick-result"></div>
+    </div>
+  </section>
+
+  <section id="log">
+    <div class="section-head"><h2>배정 이력</h2></div>
+    <p class="section-sub">확정된 배정입니다. 잘못 확정했다면 해당 줄의 되돌리기를 누르세요.</p>
+    <div class="card">
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>연월</th><th>사무실</th><th>이름</th><th>사무실</th><th>이름</th><th></th></tr></thead>
+          <tbody id="log-body"></tbody>
+        </table>
+      </div>
+      <p class="empty-note" id="log-empty" hidden>아직 이 화면에서 확정한 배정이 없습니다.</p>
+    </div>
+  </section>
+
+  <section id="roster">
+    <div class="section-head"><h2>인원 · 공정성 현황</h2></div>
+    <p class="section-sub">총 당번 횟수는 2018~2026년 이력과 이 화면에서 확정한 배정을 합산한 값입니다. 막대가 짧을수록 상대적으로 적게 했다는 뜻입니다. 휴직·퇴사자는 삭제하지 말고 "제외"로 바꿔 이력만 남기세요.</p>
+    <div class="card">
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>사무실</th><th>이름</th><th>총 횟수</th><th></th><th>최근 당번</th><th>상태</th><th></th></tr></thead>
+          <tbody id="roster-body"></tbody>
+        </table>
+      </div>
+      <div class="add-row">
+        <select id="new-office"><option value="1">사무실 1</option><option value="2">사무실 2</option><option value="3">사무실 3</option></select>
+        <input type="text" id="new-name" placeholder="이름">
+        <button class="btn small" id="btn-add-person">인원 추가</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="ref">
+    <div class="section-head"><h2>참고 — 2026년 기존 배정 (엑셀에서 가져옴)</h2></div>
+    <details>
+      <summary>2026년 1~12월 배정 펼쳐보기</summary>
+      <div class="inner">
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>월</th><th>사무실</th><th>이름</th><th>사무실</th><th>이름</th></tr></thead>
+            <tbody id="ref-2026"></tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section id="backup">
+    <div class="section-head"><h2>백업</h2></div>
+    <p class="section-sub">이 화면의 데이터는 지금 사용 중인 브라우저에만 저장됩니다. 다른 기기·다른 담당자와 이어서 쓰려면 내보내기 파일을 전달하고 불러오세요.</p>
+    <div class="card">
+      <div class="backup-row">
+        <button class="btn small" id="btn-export">데이터 내보내기 (JSON)</button>
+        <label class="btn small" style="margin:0">
+          불러오기 <input type="file" id="file-import" accept="application/json" style="display:none">
+        </label>
+        <button class="btn small ghost" id="btn-reset">전체 초기화</button>
+      </div>
+      <p class="msg" id="backup-msg"></p>
+    </div>
+  </section>
+
+  <footer>당번 배정 도우미 · 이 브라우저에만 데이터가 저장됩니다 · 사무실 배정과 기존 이력은 2026년 9월 기준 엑셀 자료를 반영했습니다</footer>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  var STORAGE_KEY = 'duty-app-v1';
+
+  var SEED = [
+    {"office":2,"name":"염미애","seedCount":6,"seedYM":"2023-07"},
+    {"office":3,"name":"오승은","seedCount":7,"seedYM":"2024-03"},
+    {"office":1,"name":"장윤하","seedCount":8,"seedYM":"2025-07"},
+    {"office":1,"name":"신수아","seedCount":7,"seedYM":"2025-05"},
+    {"office":2,"name":"신수경","seedCount":6,"seedYM":"2026-03"},
+    {"office":3,"name":"박연희","seedCount":8,"seedYM":"2026-09"},
+    {"office":2,"name":"정미라","seedCount":5,"seedYM":"2023-08"},
+    {"office":1,"name":"김유진","seedCount":5,"seedYM":"2026-02"},
+    {"office":1,"name":"안수진","seedCount":6,"seedYM":"2025-08"},
+    {"office":2,"name":"이소연","seedCount":7,"seedYM":"2026-07"},
+    {"office":1,"name":"김보경","seedCount":3,"seedYM":"2026-10"},
+    {"office":2,"name":"안나연","seedCount":1,"seedYM":"2020-11"},
+    {"office":2,"name":"허지혜","seedCount":5,"seedYM":"2026-02"},
+    {"office":2,"name":"고은하","seedCount":3,"seedYM":"2026-09"},
+    {"office":1,"name":"김현정","seedCount":4,"seedYM":"2026-01"},
+    {"office":2,"name":"박유정","seedCount":3,"seedYM":"2025-05"},
+    {"office":1,"name":"박보미","seedCount":3,"seedYM":"2026-05"},
+    {"office":1,"name":"채영은","seedCount":2,"seedYM":"2026-03"},
+    {"office":3,"name":"이현지","seedCount":3,"seedYM":"2026-08"},
+    {"office":3,"name":"김유정","seedCount":3,"seedYM":"2026-04"},
+    {"office":1,"name":"김영민","seedCount":2,"seedYM":"2026-06"},
+    {"office":2,"name":"변수지","seedCount":3,"seedYM":"2026-11"},
+    {"office":2,"name":"장다원","seedCount":3,"seedYM":"2026-04"},
+    {"office":2,"name":"김도이","seedCount":2,"seedYM":"2026-05"},
+    {"office":1,"name":"이은수","seedCount":2,"seedYM":"2026-11"},
+    {"office":1,"name":"홍주희","seedCount":1,"seedYM":"2026-07"},
+    {"office":2,"name":"김수영","seedCount":1,"seedYM":"2026-12"},
+    {"office":3,"name":"정혜원","seedCount":1,"seedYM":"2026-06"},
+    {"office":2,"name":"김명호","seedCount":1,"seedYM":"2026-10"},
+    {"office":1,"name":"박초이","seedCount":1,"seedYM":"2026-08"},
+    {"office":1,"name":"신소민","seedCount":1,"seedYM":"2026-12"},
+    {"office":2,"name":"최동주","seedCount":0,"seedYM":null},
+    {"office":1,"name":"용혜령","seedCount":0,"seedYM":null}
+  ];
+
+  var REF_2026 = [
+    [1,[1,"김현정"],[null,"이성빈"]],
+    [2,[1,"김유진"],[2,"허지혜"]],
+    [3,[2,"신수경"],[1,"채영은"]],
+    [4,[3,"김유정"],[2,"장다원"]],
+    [5,[1,"박보미"],[2,"김도이"]],
+    [6,[1,"김영민"],[3,"정혜원"]],
+    [7,[2,"이소연"],[1,"홍주희"]],
+    [8,[3,"이현지"],[1,"박초이"]],
+    [9,[3,"박연희"],[2,"고은하"]],
+    [10,[1,"김보경"],[2,"김명호"]],
+    [11,[2,"변수지"],[1,"이은수"]],
+    [12,[2,"김수영"],[1,"신소민"]]
+  ];
+
+  function uid(){ return 'p' + Math.random().toString(36).slice(2,9); }
+
+  function defaultState(){
+    return {
+      people: SEED.map(function(s){
+        return { id: uid(), office: s.office, name: s.name, seedCount: s.seedCount, seedYM: s.seedYM, active: true };
+      }),
+      log: []
+    };
+  }
+
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return defaultState();
+      var parsed = JSON.parse(raw);
+      if(!parsed || !Array.isArray(parsed.people)) return defaultState();
+      if(!Array.isArray(parsed.log)) parsed.log = [];
+      return parsed;
+    }catch(e){ return defaultState(); }
+  }
+
+  function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+
+  var state = loadState();
+  var pendingDraw = null; // {ym, picks:[{id,office,name,reason}], skipIds:[]}
+
+  function personById(id){
+    for(var i=0;i<state.people.length;i++){ if(state.people[i].id===id) return state.people[i]; }
+    return null;
+  }
+
+  function derive(person){
+    var count = person.seedCount || 0;
+    var lastYM = person.seedYM || null;
+    state.log.forEach(function(entry){
+      entry.picks.forEach(function(pk){
+        if(pk.id === person.id){
+          count += 1;
+          if(!lastYM || entry.ym > lastYM) lastYM = entry.ym;
+        }
+      });
+    });
+    return { count: count, lastYM: lastYM };
+  }
+
+  function maxCount(){
+    var m = 0;
+    state.people.forEach(function(p){ var d = derive(p); if(d.count>m) m=d.count; });
+    return m || 1;
+  }
+
+  function pad2(n){ return n<10 ? '0'+n : ''+n; }
+
+  function addMonth(ym, delta){
+    var y = parseInt(ym.slice(0,4),10), m = parseInt(ym.slice(5,7),10);
+    m += delta;
+    while(m>12){ m-=12; y+=1; }
+    while(m<1){ m+=12; y-=1; }
+    return y + '-' + pad2(m);
+  }
+
+  function computeDefaultTargetYM(){
+    var latest = null;
+    state.people.forEach(function(p){
+      if(p.seedYM && (!latest || p.seedYM > latest)) latest = p.seedYM;
+    });
+    state.log.forEach(function(e){
+      if(!latest || e.ym > latest) latest = e.ym;
+    });
+    if(!latest){
+      var now = new Date();
+      return now.getFullYear() + '-' + pad2(now.getMonth()+1);
+    }
+    return addMonth(latest, 1);
+  }
+
+  // ---------- exclude checkboxes ----------
+  function renderExcludeList(){
+    var wrap = document.getElementById('exclude-list');
+    wrap.innerHTML = '';
+    state.people.filter(function(p){return p.active;}).forEach(function(p){
+      var lbl = document.createElement('label');
+      lbl.className = 'chip-toggle';
+      lbl.innerHTML = '<input type="checkbox" data-id="'+p.id+'"> ['+p.office+'] '+escapeHtml(p.name);
+      var cb = lbl.querySelector('input');
+      cb.addEventListener('change', function(){
+        lbl.classList.toggle('on', cb.checked);
+      });
+      wrap.appendChild(lbl);
+    });
+  }
+
+  function currentExcludedIds(){
+    var ids = [];
+    document.querySelectorAll('#exclude-list input:checked').forEach(function(cb){ ids.push(cb.dataset.id); });
+    return ids;
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+    });
+  }
+
+  // ---------- draw logic ----------
+  function rankEligible(excludeIds, skipIds){
+    var excl = {};
+    excludeIds.forEach(function(id){ excl[id]=true; });
+    skipIds.forEach(function(id){ excl[id]=true; });
+    var list = state.people.filter(function(p){ return p.active && !excl[p.id]; });
+    list.forEach(function(p){ p._d = derive(p); });
+    list.sort(function(a,b){
+      if(a._d.count !== b._d.count) return a._d.count - b._d.count;
+      var am = a._d.lastYM || '0000-00', bm = b._d.lastYM || '0000-00';
+      if(am !== bm) return am < bm ? -1 : 1;
+      return a.name < b.name ? -1 : (a.name > b.name ? 1 : 0);
+    });
+    return list;
+  }
+
+  function draw(ym, skipIds){
+    skipIds = skipIds || [];
+    var excludeIds = currentExcludedIds();
+    var ranked = rankEligible(excludeIds, skipIds);
+    if(ranked.length < 1){
+      return { ym: ym, picks: [], skipIds: skipIds, error: '뽑을 수 있는 인원이 없습니다. 제외 인원을 확인하세요.' };
+    }
+    var pickA = ranked[0];
+    var pickB = null;
+    for(var i=1;i<ranked.length;i++){
+      if(ranked[i].office !== pickA.office){ pickB = ranked[i]; break; }
+    }
+    var picks = [];
+    picks.push({ id: pickA.id, office: pickA.office, name: pickA.name, reason: reasonText(pickA) });
+    if(pickB){
+      picks.push({ id: pickB.id, office: pickB.office, name: pickB.name, reason: reasonText(pickB) });
+    }
+    return { ym: ym, picks: picks, skipIds: skipIds, error: pickB ? null : '다른 사무실 후보가 없어 한 명만 뽑혔습니다.' };
+  }
+
+  function reasonText(p){
+    var d = p._d || derive(p);
+    if(d.count === 0) return '이력상 당번 0회';
+    return '총 ' + d.count + '회 · 최근 ' + (d.lastYM || '없음');
+  }
+
+  function officeTagClass(o){ return 'off-'+(o||'x'); }
+
+  function renderPick(){
+    var box = document.getElementById('pick-result');
+    var btnRedraw = document.getElementById('btn-redraw');
+    if(!pendingDraw){ box.innerHTML=''; btnRedraw.disabled = true; return; }
+    btnRedraw.disabled = pendingDraw.picks.length === 0;
+
+    if(pendingDraw.picks.length === 0){
+      box.innerHTML = '<p class="empty-note">' + escapeHtml(pendingDraw.error || '뽑을 인원이 없습니다.') + '</p>';
+      return;
+    }
+
+    var html = '<div class="pick-row">';
+    pendingDraw.picks.forEach(function(pk, idx){
+      html += '<div class="pick-card">' +
+        '<span class="off tag-off ' + officeTagClass(pk.office) + '">사무실 ' + pk.office + '</span>' +
+        '<span class="name">' + escapeHtml(pk.name) + '</span>' +
+        '<span class="why">' + escapeHtml(pk.reason) + '</span>' +
+        '<select data-idx="'+idx+'" class="swap-select"><option value="">— 다른 사람으로 교체 —</option></select>' +
+        '</div>';
+    });
+    html += '</div>';
+    if(pendingDraw.error) html += '<p class="empty-note">' + escapeHtml(pendingDraw.error) + '</p>';
+    html += '<div class="pick-actions"><button class="btn primary" id="btn-confirm">이 배정 확정</button></div>';
+    box.innerHTML = html;
+
+    // fill swap selects with all active people not already picked
+    var pickedIds = pendingDraw.picks.map(function(p){return p.id;});
+    box.querySelectorAll('.swap-select').forEach(function(sel){
+      var idx = parseInt(sel.dataset.idx,10);
+      var options = state.people.filter(function(p){ return p.active && pickedIds.indexOf(p.id) === -1 || p.id === pendingDraw.picks[idx].id; });
+      state.people.filter(function(p){return p.active;}).forEach(function(p){
+        if(pickedIds.indexOf(p.id) !== -1 && p.id !== pendingDraw.picks[idx].id) return;
+        var opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = '['+p.office+'] ' + p.name;
+        if(p.id === pendingDraw.picks[idx].id) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      sel.addEventListener('change', function(){
+        if(!sel.value) return;
+        var p = personById(sel.value);
+        if(!p) return;
+        pendingDraw.picks[idx] = { id: p.id, office: p.office, name: p.name, reason: '수동 교체' };
+        renderPick();
+      });
+    });
+
+    document.getElementById('btn-confirm').addEventListener('click', confirmDraw);
+  }
+
+  function confirmDraw(){
+    if(!pendingDraw || pendingDraw.picks.length === 0) return;
+    state.log.push({ ym: pendingDraw.ym, picks: pendingDraw.picks.map(function(p){
+      return { id: p.id, office: p.office, name: p.name };
+    })});
+    state.log.sort(function(a,b){ return a.ym < b.ym ? -1 : (a.ym > b.ym ? 1 : 0); });
+    saveState();
+    pendingDraw = null;
+    document.getElementById('target-ym').value = computeDefaultTargetYM();
+    renderAll();
+  }
+
+  // ---------- log table ----------
+  function renderLog(){
+    var body = document.getElementById('log-body');
+    var empty = document.getElementById('log-empty');
+    body.innerHTML = '';
+    if(state.log.length === 0){ empty.hidden = false; return; }
+    empty.hidden = true;
+    state.log.slice().reverse().forEach(function(entry){
+      var p1 = entry.picks[0] || {}; var p2 = entry.picks[1] || {};
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td class="mono">'+entry.ym+'</td>' +
+        '<td><span class="tag-off '+officeTagClass(p1.office)+'">'+(p1.office||'-')+'</span></td>' +
+        '<td>'+escapeHtml(p1.name||'')+'</td>' +
+        '<td>'+(p2.office ? '<span class="tag-off '+officeTagClass(p2.office)+'">'+p2.office+'</span>' : '')+'</td>' +
+        '<td>'+escapeHtml(p2.name||'')+'</td>' +
+        '<td><button class="btn ghost small" data-ym="'+entry.ym+'">되돌리기</button></td>';
+      body.appendChild(tr);
+    });
+    body.querySelectorAll('button[data-ym]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var ym = btn.dataset.ym;
+        if(!confirm(ym + ' 배정을 삭제할까요?')) return;
+        var idx = state.log.findIndex(function(e){ return e.ym === ym; });
+        if(idx !== -1){ state.log.splice(idx,1); saveState(); renderAll(); }
+      });
+    });
+  }
+
+  // ---------- roster table ----------
+  function renderRoster(){
+    var body = document.getElementById('roster-body');
+    body.innerHTML = '';
+    var mc = maxCount();
+    var rows = state.people.slice().sort(function(a,b){
+      if(a.office !== b.office) return a.office - b.office;
+      return a.name < b.name ? -1 : 1;
+    });
+    rows.forEach(function(p){
+      var d = derive(p);
+      var tr = document.createElement('tr');
+      var pct = Math.round((d.count/mc)*100);
+      tr.innerHTML =
+        '<td><span class="tag-off '+officeTagClass(p.office)+'">사무실 '+p.office+'</span></td>' +
+        '<td>'+escapeHtml(p.name)+'</td>' +
+        '<td class="num-cell">'+d.count+'회</td>' +
+        '<td><div class="meter"><i style="width:'+pct+'%"></i></div></td>' +
+        '<td class="mono">'+(d.lastYM||'—')+'</td>' +
+        '<td><button class="status-toggle '+(p.active?'active':'inactive')+'" data-toggle="'+p.id+'">'+(p.active?'재직':'제외')+'</button></td>' +
+        '<td><button class="btn ghost small" data-remove="'+p.id+'">삭제</button></td>';
+      body.appendChild(tr);
+    });
+    body.querySelectorAll('button[data-toggle]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var p = personById(btn.dataset.toggle);
+        if(!p) return;
+        p.active = !p.active;
+        saveState();
+        renderAll();
+      });
+    });
+    body.querySelectorAll('button[data-remove]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var p = personById(btn.dataset.remove);
+        if(!p) return;
+        if(!confirm(p.name+' 님을 목록에서 완전히 삭제할까요? (이력도 함께 사라집니다. 퇴사·휴직이면 대신 "제외" 버튼을 쓰세요)')) return;
+        state.people = state.people.filter(function(x){ return x.id !== p.id; });
+        state.log.forEach(function(e){ e.picks = e.picks.filter(function(pk){ return pk.id !== p.id; }); });
+        saveState();
+        renderAll();
+      });
+    });
+  }
+
+  // ---------- reference 2026 table ----------
+  function renderRef(){
+    var body = document.getElementById('ref-2026');
+    body.innerHTML = '';
+    REF_2026.forEach(function(row){
+      var m = row[0], a = row[1], b = row[2];
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td class="mono">'+m+'월</td>' +
+        '<td>'+(a[0]?'<span class="tag-off '+officeTagClass(a[0])+'">'+a[0]+'</span>':'-')+'</td>' +
+        '<td>'+escapeHtml(a[1])+'</td>' +
+        '<td>'+(b[0]?'<span class="tag-off '+officeTagClass(b[0])+'">'+b[0]+'</span>':'-')+'</td>' +
+        '<td>'+escapeHtml(b[1])+'</td>';
+      body.appendChild(tr);
+    });
+  }
+
+  // ---------- add person ----------
+  document.getElementById('btn-add-person').addEventListener('click', function(){
+    var name = document.getElementById('new-name').value.trim();
+    var office = parseInt(document.getElementById('new-office').value,10);
+    if(!name) return;
+    state.people.push({ id: uid(), office: office, name: name, seedCount: 0, seedYM: null, active: true });
+    document.getElementById('new-name').value = '';
+    saveState();
+    renderAll();
+  });
+
+  // ---------- draw buttons ----------
+  document.getElementById('btn-draw').addEventListener('click', function(){
+    var ym = document.getElementById('target-ym').value;
+    if(!ym) return;
+    pendingDraw = draw(ym, []);
+    renderPick();
+  });
+  document.getElementById('btn-redraw').addEventListener('click', function(){
+    if(!pendingDraw) return;
+    var skip = pendingDraw.skipIds.concat(pendingDraw.picks.map(function(p){return p.id;}));
+    pendingDraw = draw(pendingDraw.ym, skip);
+    renderPick();
+  });
+
+  // ---------- backup ----------
+  document.getElementById('btn-export').addEventListener('click', function(){
+    var blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'duty-backup-' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+  document.getElementById('file-import').addEventListener('change', function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      var msg = document.getElementById('backup-msg');
+      try{
+        var parsed = JSON.parse(reader.result);
+        if(!parsed || !Array.isArray(parsed.people) || !Array.isArray(parsed.log)) throw new Error('형식 오류');
+        state = parsed;
+        saveState();
+        pendingDraw = null;
+        document.getElementById('target-ym').value = computeDefaultTargetYM();
+        renderAll();
+        msg.textContent = '불러오기 완료';
+        msg.classList.remove('err');
+      }catch(err){
+        msg.textContent = '불러오기 실패 — 올바른 백업 파일인지 확인하세요.';
+        msg.classList.add('err');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+  document.getElementById('btn-reset').addEventListener('click', function(){
+    if(!confirm('모든 배정 이력과 인원 수정 내용을 지우고 처음 상태(2026년 9월 기준 자료)로 되돌릴까요?')) return;
+    state = defaultState();
+    saveState();
+    pendingDraw = null;
+    document.getElementById('target-ym').value = computeDefaultTargetYM();
+    renderAll();
+  });
+
+  function renderAll(){
+    renderExcludeList();
+    renderLog();
+    renderRoster();
+    renderRef();
+    renderPick();
+  }
+
+  document.getElementById('target-ym').value = computeDefaultTargetYM();
+  renderAll();
+})();
+</script>
+</body>
+</html>
